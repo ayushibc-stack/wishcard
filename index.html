@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WishCard.in — Create Cinematic Wish Experiences | Free Greeting Card Maker</title>
+<meta name="description" content="Free mein banao personalized birthday cards, Diwali wishes, wedding greetings aur bahut kuch. Naam, photo daalo — 2 minute mein ready. WhatsApp pe share karo.">
+<meta name="keywords" content="birthday card maker hindi, free wish card india, personalized greeting card, whatsapp birthday card, diwali card maker, free card maker india">
+<meta property="og:title" content="WishCard.in — Create Cinematic Wish Experiences">
+<meta property="og:description" content="Free mein banao personalized birthday cards, Diwali wishes aur bahut kuch. 2 minute mein ready.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --ink: #05020a;          /* Ultimate Cinematic Dark Base */
+  --paper: #0b0714;        
+  --gold: #ffaa1d;
+  --gold-light: #ffd166;
+  --rose: #ff4760;
+  --teal: #14b8a6;
+  --purple: #a855f7;       
+  --purple-light: #c084fc;
+  --text: #f3f1f5;         
+  --muted: #948ea5;        
+  --border: rgba(255,255,255,0.07);
+  --card-bg: #110c1f;      
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.25;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(5, 2, 10, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-logo {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+.nav-logo span { color: var(--purple-light); }
+
+.nav-links {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: #fff; }
+
+.nav-cta {
+  background: white;
+  color: var(--ink) !important;
+  padding: 8px 18px;
+  border-radius: 100px;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+.nav-cta:hover { background: var(--purple-light) !important; color: var(--ink) !important; }
+
+/* ── HERO SECTION ── */
+.hero {
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 130px 24px 30px; 
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  background: radial-gradient(circle at center, #160d29 0%, var(--ink) 78%);
+}
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 920px;
+  width: 100%;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  width: 750px; height: 750px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 65%);
+  top: -150px; left: 50%;
+  transform: translateX(-50%);
+  animation: floatBlob 8s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes floatBlob {
+  from { transform: translateX(-50%) translate(0, 0) scale(1); }
+  to { transform: translateX(-50%) translate(20px, 15px) scale(1.05); }
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 100px;
+  padding: 8px 18px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 28px;
+  animation: fadeDown 0.6s ease both;
+}
+
+.hero-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: clamp(38px, 6.8vw, 76px);
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  color: #ffffff !important;
+  margin-bottom: 24px;
+  animation: fadeDown 0.6s ease 0.1s both;
+}
+.hero-title span {
+  background: linear-gradient(to right, #ffffff, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle-aesthetic {
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(18px, 3.2vw, 26px);
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  margin-bottom: 14px;
+  animation: fadeDown 0.6s ease 0.18s both;
+}
+
+.hero-tagline {
+  font-size: clamp(14px, 2.2vw, 16px);
+  color: var(--muted);
+  max-width: 600px;
+  line-height: 1.6;
+  margin: 0 auto 36px;
+  animation: fadeDown 0.6s ease 0.25s both;
+}
+
+.hero-action-pill {
+  font-family: 'Noto Sans Devanagari', 'Poppins', sans-serif;
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 14px 32px;
+  border-radius: 100px;
+  font-size: clamp(13px, 2vw, 15px);
+  color: #ffffff;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  margin-bottom: 44px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  animation: fadeDown 0.6s ease 0.35s both;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.hero-action-pill:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--purple-light);
+  transform: translateY(-2px);
+}
+
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeDown 0.6s ease 0.45s both;
+}
+.stat { text-align: center; }
+.stat-num {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  color: #fff;
+}
+.stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ── FLOATING GLASSMORPHIC GLOW BUTTON SYSTEM ── */
+.hero-preview {
+  display: flex;
+  gap: 28px;
+  margin-top: 32px; 
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeDown 0.7s ease 0.5s both;
+}
+
+.glass-pill-panel {
+  position: relative;
+  text-decoration: none;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  animation: pillFloat 3.5s ease-in-out infinite alternate;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.glass-pill-panel:nth-child(1) { animation-delay: 0s; }
+.glass-pill-panel:nth-child(2) { animation-delay: 0.3s; }
+.glass-pill-panel:nth-child(3) { animation-delay: 0.6s; }
+.glass-pill-panel:nth-child(4) { animation-delay: 0.9s; }
+.glass-pill-panel:nth-child(5) { animation-delay: 1.2s; }
+
+.pill-micro-tag {
+  position: absolute;
+  top: -11px;
+  right: 18px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 100px;
+  color: #fff;
+  z-index: 3;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pill-body {
+  padding: 14px 30px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+/* 1. Birthday Card Button */
+.glass-pill-panel.birthday .pill-micro-tag { background: linear-gradient(135deg, #ff4760, #a855f7); }
+.glass-pill-panel.birthday .pill-body { 
+  background: rgba(255, 71, 96, 0.04); 
+  box-shadow: 0 8px 32px rgba(255, 71, 96, 0.08), inset 0 1px 0px rgba(255,255,255,0.1);
+}
+.glass-pill-panel.birthday:hover .pill-body {
+  box-shadow: 0 0 30px rgba(255, 71, 96, 0.4);
+  border-color: rgba(255, 71, 96, 0.5);
+  transform: scale(1.05);
+}
+
+/* 2. Festival Wishes Button */
+.glass-pill-panel.festival .pill-micro-tag { background: linear-gradient(135deg, #ffaa1d, #f97316); }
+.glass-pill-panel.festival .pill-body { 
+  background: rgba(255, 170, 29, 0.04); 
+  box-shadow: 0 8px 32px rgba(255, 170, 29, 0.08), inset 0 1px 0px rgba(255,255,255,0.1);
+}
+.glass-pill-panel.festival:hover .pill-body {
+  box-shadow: 0 0 30px rgba(255, 170, 29, 0.5);
+  border-color: rgba(255, 170, 29, 0.6);
+  transform: scale(1.05);
+}
+
+/* 3. Anniversary Wishes Button */
+.glass-pill-panel.anniversary .pill-micro-tag { background: linear-gradient(135deg, #f472b6, #fda4af); }
+.glass-pill-panel.anniversary .pill-body { 
+  background: rgba(244, 114, 182, 0.04); 
+  box-shadow: 0 8px 32px rgba(244, 114, 182, 0.06), inset 0 1px 0px rgba(255,255,255,0.1);
+}
+.glass-pill-panel.anniversary:hover .pill-body {
+  box-shadow: 0 0 30px rgba(244, 114, 182, 0.45);
+  border-color: rgba(244, 114, 182, 0.5);
+  transform: scale(1.05);
+}
+
+/* 4. Proposal Card Button */
+.glass-pill-panel.proposal .pill-micro-tag { background: linear-gradient(135deg, #3b82f6, #14b8a6); }
+.glass-pill-panel.proposal .pill-body { 
+  background: rgba(59, 130, 246, 0.04); 
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.06), inset 0 1px 0px rgba(255,255,255,0.1);
+}
+.glass-pill-panel.proposal:hover .pill-body {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.45);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: scale(1.05);
+}
+
+/* 5. Congrats Card Button */
+.glass-pill-panel.congrats .pill-micro-tag { background: linear-gradient(135deg, #14b8a6, #059669); }
+.glass-pill-panel.congrats .pill-body { 
+  background: rgba(20, 184, 166, 0.04); 
+  box-shadow: 0 8px 32px rgba(20, 184, 166, 0.06), inset 0 1px 0px rgba(255,255,255,0.1);
+}
+.glass-pill-panel.congrats:hover .pill-body {
+  box-shadow: 0 0 30px rgba(20, 184, 166, 0.45);
+  border-color: rgba(20, 184, 166, 0.5);
+  transform: scale(1.05);
+}
+
+@keyframes pillFloat {
+  from { transform: translateY(0); }
+  to { transform: translateY(-7px); }
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── ALL TOOLS DYNAMIC EMOTIONAL GRID ── */
+.tools-section {
+  padding: 40px 24px 100px; 
+  max-width: 1140px;
+  margin: 0 auto;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+.section-tag {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--purple-light);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.section-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: clamp(28px, 5vw, 42px);
+  letter-spacing: -1px;
+  color: #fff;
+  line-height: 1.2;
+}
+.section-title span { color: var(--purple-light); }
+.section-sub {
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.tool-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 28px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.tool-icon {
+  width: 54px; height: 54px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
+}
+
+.status-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 100px;
+  letter-spacing: 0.3px;
+}
+
+.tool-name {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 19px;
+  color: #fff;
+  margin-bottom: 3px;
+}
+.tool-name-hindi {
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  font-size: 13px;
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+.tool-desc {
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  flex: 1;
+}
+
+.tool-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.availability-tag { font-size: 12px; font-weight: 500; }
+
+.tool-arrow {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.25s ease;
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+}
+
+/* 1. Birthday Card Theme */
+.tool-card.birthday { border-color: rgba(255, 71, 96, 0.15); }
+.birthday .tool-icon { background: linear-gradient(135deg, #ff4760, #a855f7); }
+.birthday .status-pill { background: rgba(255, 71, 96, 0.15); color: #ff6b81; }
+.birthday .tool-name-hindi { color: #ff6b81; }
+.birthday .tool-desc { color: #e2ddec; }
+.birthday .availability-tag { color: #ff4760; }
+.birthday:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 71, 96, 0.4);
+  box-shadow: 0 20px 40px rgba(255, 71, 96, 0.15);
+  background: linear-gradient(180deg, #160c18 0%, #110c1f 100%);
+}
+.birthday:hover .tool-arrow { background: #ff4760; transform: rotate(-45deg); }
+
+/* 2. Festival Card Theme */
+.tool-card.diwali { border-color: rgba(255, 170, 29, 0.12); }
+.diwali .tool-icon { background: linear-gradient(135deg, #ffaa1d, #f97316); }
+.diwali .status-pill { background: rgba(255, 170, 29, 0.12); color: #ffb84d; }
+.diwali .tool-name-hindi { color: #ffaa1d; }
+.diwali .tool-desc { color: #eadecc; }
+.diwali .availability-tag { color: #ffaa1d; }
+.diwali:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 170, 29, 0.35);
+  box-shadow: 0 20px 40px rgba(255, 170, 29, 0.12);
+  background: linear-gradient(180deg, #19110b 0%, #110c1f 100%);
+}
+.diwali:hover .tool-arrow { background: #ffaa1d; color: var(--ink); transform: rotate(-45deg); }
+
+/* 3. Wedding Card Theme */
+.tool-card.wedding { border-color: rgba(244, 114, 182, 0.12); }
+.wedding .tool-icon { background: linear-gradient(135deg, #f472b6, #fda4af); }
+.wedding .status-pill { background: rgba(244, 114, 182, 0.12); color: #f472b6; }
+.wedding .tool-name-hindi { color: #f472b6; }
+.wedding .tool-desc { color: #ebdce4; }
+.wedding .availability-tag { color: rgba(244, 114, 182, 0.6); }
+.wedding:hover {
+  transform: translateY(-6px);
+  border-color: rgba(244, 114, 182, 0.35);
+  box-shadow: 0 20px 40px rgba(244, 114, 182, 0.12);
+  background: linear-gradient(180deg, #1b0f16 0%, #110c1f 100%);
+}
+.wedding:hover .tool-arrow { background: #f472b6; transform: rotate(-45deg); }
+
+/* 4. Exam Result Card Theme */
+.tool-card.exam { border-color: rgba(20, 184, 166, 0.12); }
+.exam .tool-icon { background: linear-gradient(135deg, #14b8a6, #059669); }
+.exam .status-pill { background: rgba(20, 184, 166, 0.12); color: #2dd4bf; }
+.exam .tool-name-hindi { color: #14b8a6; }
+.exam .tool-desc { color: #d0e7e4; }
+.exam .availability-tag { color: rgba(20, 184, 166, 0.6); }
+.exam:hover {
+  transform: translateY(-6px);
+  border-color: rgba(20, 184, 166, 0.35);
+  box-shadow: 0 20px 40px rgba(20, 184, 166, 0.12);
+  background: linear-gradient(180deg, #0a1716 0%, #110c1f 100%);
+}
+.exam:hover .tool-arrow { background: #14b8a6; color: var(--ink); transform: rotate(-45deg); }
+
+/* 5. Job Promotion Card Theme */
+.tool-card.job { border-color: rgba(59, 130, 246, 0.12); }
+.job .tool-icon { background: linear-gradient(135deg, #3b82f6, #6366f1); }
+.job .status-pill { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+.job .tool-name-hindi { color: #60a5fa; }
+.job .tool-desc { color: #d6e2f7; }
+.job .availability-tag { color: rgba(59, 130, 246, 0.6); }
+.job:hover {
+  transform: translateY(-6px);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.12);
+  background: linear-gradient(180deg, #0b1222 0%, #110c1f 100%);
+}
+.job:hover .tool-arrow { background: #3b82f6; transform: rotate(-45deg); }
+
+/* 6. Future Panel Theme */
+.tool-card.coming { opacity: 0.4; cursor: not-allowed; border-color: var(--border); }
+.coming .tool-icon { background: rgba(255,255,255,0.04); color: var(--muted); }
+.coming .status-pill { background: rgba(255,255,255,0.04); color: var(--muted); }
+.coming .tool-name-hindi { color: var(--muted); }
+.coming .tool-desc { color: var(--muted); }
+.tool-card.coming:hover { transform: none; box-shadow: none; border-color: var(--border); }
+.coming .tool-arrow { background: transparent; color: rgba(255,255,255,0.1); }
+
+/* ── HOW IT WORKS SECTION ── */
+.how-section {
+  background: #080413;
+  padding: 95px 24px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.steps {
+  display: flex;
+  gap: 0;
+  max-width: 820px;
+  margin: 54px auto 0;
+  position: relative;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 30px; left: 15%; right: 15%;
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+}
+
+.step {
+  flex: 1;
+  min-width: 170px;
+  padding: 0 20px;
+  position: relative;
+}
+.step-num {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--purple-light);
+  margin: 0 auto 20px;
+}
+.step-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: white;
+  margin-bottom: 8px;
+}
+.step-title-hindi {
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.step-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── WHY US SECTION ── */
+.why-section {
+  padding: 100px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 18px;
+  margin-top: 54px;
+}
+
+.why-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 26px;
+}
+.why-icon { font-size: 26px; margin-bottom: 14px; }
+.why-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.why-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── FOOTER ── */
+footer {
+  background: #040208;
+  padding: 60px 24px 40px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+.footer-logo {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: white;
+  margin-bottom: 8px;
+}
+.footer-logo span { color: var(--purple-light); }
+.footer-tagline {
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 26px;
+}
+.footer-links {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+.footer-links a {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--purple-light); }
+.footer-copy { font-size: 12px; color: rgba(255,255,255,0.12); }
+
+@media (max-width: 600px) {
+  .nav-links { display: none; }
+  .steps::before { display: none; }
+  .hero-stats { gap: 24px; }
+  .tools-grid { grid-template-columns: 1fr; }
+  .step { padding: 0 10px 30px; }
+  .hero-preview { gap: 14px; margin-top: 36px; }
+  .pill-body { padding: 10px 22px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">Wish<span>Card</span>.in</a>
+  <ul class="nav-links">
+    <li><a href="#tools">Tools</a></li>
+    <li><a href="#how">Kaise Kaam Karta Hai</a></li>
+    <li><a href="#tools" class="nav-cta">Abhi Banao →</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">
+      🇮🇳 India's Free Wish Card Maker
+    </div>
+    
+    <h1 class="hero-title">
+      Create Cinematic<br>
+      <span>Wish Experiences</span>
+    </h1>
+    
+    <p class="hero-subtitle-aesthetic">Aesthetic, Emotional &amp; Shareable.</p>
+    <p class="hero-tagline">
+      Personalized Digital Wish Cards for Every Special Moment.
+    </p>
+
+    <a href="#tools" class="hero-action-pill">
+      नाम डालो • फोटो अपलोड करो • थीम चुनो • कार्ड तुरंत तैयार ✨
+    </a>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Bilkul Free</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">2 Min</div>
+        <div class="stat-label">Mein Ready</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">8+</div>
+        <div class="stat-label">Themes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">No</div>
+        <div class="stat-label">Login Zaroori Nahi</div>
+      </div>
+    </div>
+
+    <div class="hero-preview">
+      <a href="#tools" class="glass-pill-panel birthday">
+        <span class="pill-micro-tag">🎉 Trending</span>
+        <div class="pill-body">🎂 Birthday Card</div>
+      </a>
+
+      <a href="#tools" class="glass-pill-panel festival">
+        <span class="pill-micro-tag">🪔 Festival Special</span>
+        <div class="pill-body">🎉 Festival Wishes</div>
+      </a>
+
+      <a href="#tools" class="glass-pill-panel anniversary">
+        <span class="pill-micro-tag">💎 Premium UI</span>
+        <div class="pill-body">❤️ Anniversary Wishes</div>
+      </a>
+
+      <a href="#tools" class="glass-pill-panel proposal">
+        <span class="pill-micro-tag">✨ Most Shared</span>
+        <div class="pill-body">💖 Proposal Card</div>
+      </a>
+
+      <a href="#tools" class="glass-pill-panel congrats">
+        <span class="pill-micro-tag">✨ New Launch</span>
+        <div class="pill-body">🎓 Congrats Card</div>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<section class="tools-section" id="tools">
+  <div class="section-header">
+    <div class="section-tag">✦ Custom Curated Categories</div>
+    <h2 class="section-title">Kaunsa Card <span>Banana Hai?</span></h2>
+    <p class="section-sub">हर कार्ड की अपनी एक अलग वाइब, इमोशन और शानदार थीम</p>
+  </div>
+
+  <div class="tools-grid">
+
+    <a href="birthday.html" class="tool-card birthday">
+      <div class="tool-header-row">
+        <div class="tool-icon">🎂</div>
+        <span class="status-pill">🎉 Trending</span>
+      </div>
+      <div class="tool-name">Birthday Card Maker</div>
+      <div class="tool-name-hindi">जन्मदिन कार्ड बनाओ</div>
+      <div class="tool-desc">
+        Plain messages ko bolo bye! Apne dosto ki sabse crazy photo lagao, unka nick-name likho aur ek aisi custom dynamic wish ready karo jo unhe hamesha yaad rahegi.
+      </div>
+      <div class="tool-footer">
+        <span class="availability-tag">● Free &amp; Ready</span>
+        <div class="tool-arrow">→</div>
+      </div>
+    </a>
+
+    <a href="festival.html" class="tool-card diwali">
+      <div class="tool-header-row">
+        <div class="tool-icon">🪔</div>
+        <span class="status-pill">🪔 Festival Special</span>
+      </div>
+      <div class="tool-name">Festival Card Maker</div>
+      <div class="tool-name-hindi">त्यौहार कार्ड बनाओ</div>
+      <div class="tool-desc">
+        Har festival celebration ko ek aesthetic memory mein badlo. Soft lighting effect, festive colors aur clean typography ke sath custom cards design karo. Apne apno ko bhejo ek royal visual greeting jo unke dil ko choo jaye.
+      </div>
+      <div class="tool-footer">
+        <span class="availability-tag">● Free &amp; Ready</span>
+        <div class="tool-arrow">→</div>
+      </div>
+    </a>
+
+    <a href="wedding.html" class="tool-card wedding">
+      <div class="tool-header-row">
+        <div class="tool-icon">💍</div>
+        <span class="status-pill">💎 Premium UI</span>
+      </div>
+      <div class="tool-name">Wedding Wish Card</div>
+      <div class="tool-name-hindi">शादी की शुभकामनाएं</div>
+      <div class="tool-desc">
+        Naye jodon ki khubsurat shaadi ko ek aesthetic memory mein badlo. Soft rose-gold tones aur clean premium elements ke saath couple photo laga kar royal visual greeting prepare karo.
+      </div>
+      <div class="tool-footer">
+        <span class="availability-tag">● Jald Aayega</span>
+        <div class="tool-arrow">→</div>
+      </div>
+    </a>
+
+    <a href="exam.html" class="tool-card exam">
+      <div class="tool-header-row">
+        <div class="tool-icon">🎓</div>
+        <span class="status-pill">✨ Most Shared</span>
+      </div>
+      <div class="tool-name">Result / Congrats Card</div>
+      <div class="tool-name-hindi">बधाई कार्ड बनाओ</div>
+      <div class="tool-desc">
+        Mehnat rang layi hai toh celebration bhi bada hona chahiye! Boards clear kiye ho ya competitive exams, dosto ki is badi achievement par ek custom pride badge card banao.
+      </div>
+      <div class="tool-footer">
+        <span class="availability-tag">● Under Development</span>
+        <div class="tool-arrow">→</div>
+      </div>
+    </a>
+
+    <a href="job.html" class="tool-card job">
+      <div class="tool-header-row">
+        <div class="tool-icon">💼</div>
+        <span class="status-pill">🚀 Career Boost</span>
+      </div>
+      <div class="tool-name">New Job / Promotion Card</div>
+      <div class="tool-name-hindi">नई नौकरी की बधाई</div>
+      <div class="tool-desc">
+        Nai naukri, naya pad, naya rutba! Kisi dost ya colleague ko unke hard work ke liye professional yet creative modern tech card ke saath appreciate karo. Texting se kaafi behtar.
+      </div>
+      <div class="tool-footer">
+        <span class="availability-tag">● In Progress</span>
+        <div class="tool-arrow">→</div>
+      </div>
+    </a>
+
+    <div class="tool-card coming">
+      <div class="tool-header-row">
+        <div class="tool-icon">✨</div>
+        <span class="status-pill">🔔 Stay Tuned</span>
+      </div>
+      <div class="tool-name">Aur Bhi Aayenge...</div>
+      <div class="tool-name-hindi">और भी tools आ रहे हैं</div>
+      <div class="tool-desc">
+        Anniversary milestone, baby shower, new home entry, and global greetings — aapke har ek emotional connection ko hum premium designs ke saath cover karne wale hain.
+      </div>
+      <div class="tool-footer">
+        <span class="availability-tag">More Coming Soon</span>
+        <div class="tool-arrow">+</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="how-section" id="how">
+  <div class="section-tag">✦ Process</div>
+  <h2 class="section-title">Kaise Kaam <span>Karta Hai?</span></h2>
+  <p class="section-sub">बस 3 आसान steps — कोई technical knowledge नहीं चाहिए</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Tool Chuno</div>
+      <div class="step-title-hindi">टूल चुनो</div>
+      <div class="step-desc">Birthday, Diwali, Shaadi — jo occasion ho woh tool open karo</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Details Bharo</div>
+      <div class="step-title-hindi">जानकारी भरो</div>
+      <div class="step-desc">Naam, photo, message — apni pasand se customize karo</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Download & Bhejo</div>
+      <div class="step-title-hindi">Download करो & भेjo</div>
+      <div class="step-desc">Card download karo — WhatsApp, Instagram, Email — jahan chahiye bhejo</div>
+    </div>
+  </div>
+</section>
+
+<section class="why-section">
+  <div class="section-header">
+    <div class="section-tag">✦ Why WishCard.in</div>
+    <h2 class="section-title">Kyun <span>Hamare Saath?</span></h2>
+    <p class="section-sub">क्योंकि आपके अपने deserve करते हैं एक खास wish</p>
+  </div>
+
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-icon">🆓</div>
+      <div class="why-title">Bilkul Free</div>
+      <div class="why-desc">Koi hidden charge nahi, koi subscription nahi. Sab kuch 100% free — hamesha.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🔐</div>
+      <div class="why-title">No Login</div>
+      <div class="why-desc">Koi account banana nahi padta. Seedha tool kholo aur kaam karo — simple.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">📱</div>
+      <div class="why-title">Mobile Friendly</div>
+      <div class="why-desc">Phone pe bhi perfectly kaam karta hai. Jahan ho wahan se banao.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🇮🇳</div>
+      <div class="why-title">Hindi + English</div>
+      <div class="why-desc">Dono bhasha mein support — apni bhasha mein wish karo apno ko.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🎨</div>
+      <div class="why-title">Unique Design</div>
+      <div class="why-desc">8+ beautiful themes — boring forward nahi, ek khaas personalized card.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">⚡</div>
+      <div class="why-title">2 Minute Mein Ready</div>
+      <div class="why-desc">Last minute bhi koi baat nahi — 2 minute mein card ready ho jaata hai.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Wish<span>Card</span>.in</div>
+  <p class="footer-tagline">Personalized wishes — 2 minute mein ✨</p>
+  <div class="footer-links">
+    <a href="#tools">Tools</a>
+    <a href="#how">Kaise Kaam Karta Hai</a>
+    <a href="mailto:hello@wishcard.in">Contact</a>
+  </div>
+  <p class="footer-copy">© 2026 WishCard.in — Made with ❤️ in India</p>
+</footer>
+
+</body>
+</html>
