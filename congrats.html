@@ -653,12 +653,110 @@ body{display:flex;flex-direction:column;align-items:center;justify-content:cente
   var cw=document.getElementById('cw');
   setTimeout(function(){for(var k=0;k<90;k++){var c=document.createElement('div');c.className='cf';var cx=(Math.random()-.5)*window.innerWidth*1.8;var w=Math.random()*7+4;c.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*20+'%;width:'+w+'px;height:'+w+'px;background:'+pc[k%pc.length]+';--cd:'+(Math.random()*2.5+1).toFixed(1)+'s;--cd2:'+(Math.random()*.8).toFixed(2)+'s;--cx:'+cx.toFixed(0)+'px;border-radius:'+(Math.random()>.5?'50%':'2px')+';';cw.appendChild(c);}},2600);
 })();
-// HD Save — placeholder for custom Canvas 2D export
+// HD Save — Canvas 2D API Export
 function handleHDSave(){
-  // Custom export logic will be added here
-  var btn=document.getElementById('hdBtn');
-  btn.textContent='⏳ Saving...';
-  setTimeout(function(){btn.textContent='📸 HD Photo Save Karo';},2000);
+  var btn = document.getElementById('hdBtn');
+  btn.textContent = '⏳ Saving Card...'; btn.disabled = true;
+
+  requestAnimationFrame(function() {
+    setTimeout(function() {
+      try {
+        var cv = document.createElement('canvas');
+        var W = 1080; var H = 1920;
+        cv.width = W; cv.height = H;
+        var ctx = cv.getContext('2d');
+
+        var m = {
+          ov: '${t.ov}',
+          fade: '${t.fade}',
+          glow: '${t.glow}',
+          swL: '${t.sw}'
+        };
+        var nm = '${nm}';
+        var wh = '${o.tag}';
+        var rmg = '${ms}';
+        var sn = '${sn}';
+        var plateState = true;
+
+        var renderLayout = function() {
+          // Vignette layer
+          var vign = ctx.createRadialGradient(W/2, H/2, W*0.2, W/2, H/2, H*0.7);
+          vign.addColorStop(0, 'transparent'); vign.addColorStop(1, 'rgba(0,0,0,0.65)');
+          ctx.fillStyle = vign; ctx.fillRect(0,0,W,H);
+
+          // Color overlay mood
+          ctx.fillStyle = m.ov; ctx.fillRect(0,0,W,H);
+
+          // Black bottom lighting gradient
+          var fade = ctx.createLinearGradient(0, H*0.35, 0, H);
+          fade.addColorStop(0, 'transparent'); fade.addColorStop(1, m.fade);
+          ctx.fillStyle = fade; ctx.fillRect(0,0,W,H);
+
+          var pX=70, pY=H-660, pW=W-140, pH=540, pR=32;
+
+          // Glass Plate
+          if (plateState) {
+            ctx.save(); ctx.beginPath();
+            ctx.moveTo(pX+pR, pY); ctx.lineTo(pX+pW-pR, pY); ctx.quadraticCurveTo(pX+pW, pY, pX+pW, pY+pR);
+            ctx.lineTo(pX+pW, pY+pH-pR); ctx.quadraticCurveTo(pX+pW, pY+pH, pX+pW-pR, pY+pH);
+            ctx.lineTo(pX+pR, pY+pH); ctx.quadraticCurveTo(pX, pY+pH, pX, pY+pH-pR);
+            ctx.lineTo(pX, pY+pR); ctx.quadraticCurveTo(pX, pY, pX+pR, pY);
+            ctx.closePath();
+            ctx.fillStyle = "rgba(0, 0, 0, 0.45)"; ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+            ctx.lineWidth = 3; ctx.fill(); ctx.stroke(); ctx.restore();
+          }
+
+          // Text layout
+          ctx.textAlign = "center";
+          ctx.font = "600 26px 'Outfit', sans-serif"; ctx.fillStyle = "rgba(255,255,255,0.4)";
+          ctx.fillText("\\u2726   CONGRATULATIONS   \\u2726", W/2, pY+80);
+
+          ctx.save(); ctx.font = "700 95px 'Cormorant Garamond', serif"; ctx.fillStyle = "#ffffff";
+          ctx.shadowColor = m.glow; ctx.shadowBlur = 30;
+          ctx.fillText(nm, W/2, pY+200); ctx.restore();
+
+          ctx.font = "italic 600 46px 'Cormorant Garamond', serif"; ctx.fillStyle = m.glow;
+          ctx.fillText(wh, W/2, pY+280);
+
+          ctx.strokeStyle = "rgba(255,255,255,0.15)"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(pX+80, pY+330); ctx.lineTo(W/2-50, pY+330);
+          ctx.moveTo(W/2+50, pY+330); ctx.lineTo(pX+pW-80, pY+330); ctx.stroke();
+          ctx.font = "32px 'Outfit', sans-serif"; ctx.fillText("\\u{1F396}", W/2, pY+342);
+
+          ctx.font = "400 34px 'Outfit', sans-serif"; ctx.fillStyle = "rgba(255,255,255,0.55)";
+          var words = rmg.split(' '), line = '', lineY = pY+415;
+          for(var n=0; n<words.length; n++) {
+            var testLine = line + words[n] + ' ';
+            if (ctx.measureText(testLine).width > pW-120 && n>0) {
+              ctx.fillText(line, W/2, lineY); line = words[n] + ' '; lineY += 52;
+            } else { line = testLine; }
+          }
+          ctx.fillText(line, W/2, lineY);
+
+          // Force download
+          var link = document.createElement('a');
+          link.download = 'Congrats_Card_' + sn + '.png';
+          link.href = cv.toDataURL('image/png', 1.0);
+          link.click();
+
+          btn.textContent = '\\u{1F4F8} HD Photo Save Karo'; btn.disabled = false;
+        };
+
+        var imgEl = document.querySelector('.l-ph img');
+        if(imgEl && imgEl.src) {
+          var bg = new Image();
+          bg.onload = function() { ctx.drawImage(bg, 0, 0, W, H); renderLayout(); };
+          bg.onerror = function() { ctx.fillStyle="#0a0800"; ctx.fillRect(0,0,W,H); renderLayout(); };
+          bg.src = imgEl.src;
+        } else {
+          ctx.fillStyle = "#0a0800"; ctx.fillRect(0,0,W,H); renderLayout();
+        }
+      } catch(err) {
+        console.error(err);
+        btn.textContent = '\\u{1F4F8} HD Photo Save Karo'; btn.disabled = false;
+      }
+    }, 60);
+  });
 }
 <\/script>
 </body>
