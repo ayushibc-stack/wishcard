@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Congratulations Card Maker | WishCard.in</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Great+Vibes&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Great+Vibes&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -171,7 +173,7 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
 
 /* Sparkles for royal */
 .l-sparks{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
-.sp{position:absolute;width:2px;height:2px;background:#f5e17a;border-radius:50%;animation:sparkle var(--sd) ease-in-out infinite alternate;opacity:0;}
+.sp{position:absolute;width:2px;height:2px;background:#f5e17a;border-radius:50%;animation:sparkle var(--sd) ease-in-out infinite alternate;opacity:0;will-change:transform,opacity;}
 @keyframes sparkle{from{opacity:0;transform:scale(.4);}to{opacity:.9;transform:scale(2);}}
 
 /* Text panel */
@@ -185,7 +187,7 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
 .p-div span{flex:1;height:1px;transition:background .4s;}
 .p-msg{font-size:7px;line-height:1.55;display:block;transition:color .4s;}
 
-.pt{position:absolute;opacity:0;animation:ptf var(--fd) linear var(--fd2) infinite;}
+.pt{position:absolute;opacity:0;animation:ptf var(--fd) linear var(--fd2) infinite;will-change:transform,opacity;}
 @keyframes ptf{0%{transform:translateY(-10px) rotate(0);opacity:0;}8%{opacity:.8;}100%{transform:translateY(101%) rotate(540deg);opacity:0;}}
 
 #cropCanvas{display:none;}
@@ -227,9 +229,9 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
   <!-- Details -->
   <div class="sec">
     <div class="sh"><div class="sicon">✍️</div><div><div class="st">Details</div><div class="ss">Card pe kya dikhega</div></div></div>
-    <div class="fld"><label>Naam *</label><input class="inp" type="text" id="ni" placeholder="Dr. Priya / Rahul Kumar..." oninput="upP()"></div>
-    <div class="fld"><label>Achievement</label><input class="inp" type="text" id="ai" placeholder="MBBS • AIIMS / IIT Cleared / 99.2%" oninput="upP()"></div>
-    <div class="fld" style="margin-bottom:0"><label>Message</label><input class="inp" type="text" id="mi" placeholder="Mehnat rang layi — hum sab proud hain ✨" oninput="upP()"></div>
+    <div class="fld"><label>Naam *</label><input class="inp" type="text" id="ni" placeholder="Dr. Priya / Rahul Kumar..." oninput="debouncedUpP()"></div>
+    <div class="fld"><label>Achievement</label><input class="inp" type="text" id="ai" placeholder="MBBS • AIIMS / IIT Cleared / 99.2%" oninput="debouncedUpP()"></div>
+    <div class="fld" style="margin-bottom:0"><label>Message</label><input class="inp" type="text" id="mi" placeholder="Mehnat rang layi — hum sab proud hain ✨" oninput="debouncedUpP()"></div>
   </div>
 
   <!-- Photo -->
@@ -242,9 +244,9 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
     </div>
     <div class="ps" id="ps"></div>
     <div class="sliders-wrap">
-      <div class="sw"><div class="slr"><span>🔍 Zoom</span><span id="zv">1.0×</span></div><input type="range" id="zs" min="100" max="260" value="100" disabled oninput="upC();upZV()"></div>
-      <div class="sw"><div class="slr"><span>↔ Left/Right</span></div><input type="range" id="xs" min="-100" max="100" value="0" disabled oninput="upC()"></div>
-      <div class="sw"><div class="slr"><span>↕ Up/Down</span></div><input type="range" id="ys" min="-100" max="100" value="0" disabled oninput="upC()"></div>
+      <div class="sw"><div class="slr"><span>🔍 Zoom</span><span id="zv">1.0×</span></div><input type="range" id="zs" min="100" max="260" value="100" disabled oninput="debouncedUpC();upZV()"></div>
+      <div class="sw"><div class="slr"><span>↔ Left/Right</span></div><input type="range" id="xs" min="-100" max="100" value="0" disabled oninput="debouncedUpC()"></div>
+      <div class="sw"><div class="slr"><span>↕ Up/Down</span></div><input type="range" id="ys" min="-100" max="100" value="0" disabled oninput="debouncedUpC()"></div>
     </div>
   </div>
 
@@ -306,6 +308,13 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
 </div>
 
 <script>
+// ── UTILITIES ──
+let _upPTimer=null;
+function debouncedUpP(){clearTimeout(_upPTimer);_upPTimer=setTimeout(upP,80);}
+let _upCTimer=null;
+function debouncedUpC(){clearTimeout(_upCTimer);_upCTimer=setTimeout(function(){upC();},30);}
+let _lastTheme='', _lastBorder='';
+
 // ── DATA ──
 const OCCASIONS=[
   {k:'grad',   icon:'🎓',label:'Graduation', tag:'Congratulations Graduate!', emoji:'🎓',color:'#d4af37',msg:'Teri mehnat aaj rang layi — poora future tujhse roshan hai ✨'},
@@ -425,7 +434,7 @@ function upC(){
   const z=parseFloat(document.getElementById('zs').value)/100;
   const x=parseFloat(document.getElementById('xs').value);
   const y=parseFloat(document.getElementById('ys').value);
-  const W=900,H=1600;
+  const W=720,H=1280;
   const cv=document.getElementById('cropCanvas');
   cv.width=W; cv.height=H;
   const ctx=cv.getContext('2d');
@@ -508,8 +517,8 @@ function upP(){
   document.getElementById('pMsg').style.color='rgba(255,255,255,0.5)';
   document.getElementById('lNoPh').textContent=o.emoji;
 
-  buildSparks();
-  buildParts();
+  // Only rebuild particles/sparkles when theme changes (expensive operation)
+  if(_lastTheme!==cTheme){buildSparks();buildParts();_lastTheme=cTheme;}
   upS(document.getElementById('ni').value?2:1);
   smP();
 }

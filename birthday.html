@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Birthday Card Maker | WishCard.in</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{--bg-base:#0F0B1A;--bg-card:#1B1530;--bg-el:#211C3A;--bg-in:#16122A;--bdr:rgba(255,255,255,0.08);--bdr-f:rgba(139,92,246,0.55);--pur:#8B5CF6;--purl:#A78BFA;--pink:#EC4899;--pinkl:#F472B6;--t1:#F1EEF9;--t2:#B0A8CC;--t3:#6B6285;--gp:rgba(139,92,246,0.22);--gpi:rgba(236,72,153,0.18);--tr:all 0.22s cubic-bezier(0.4,0,0.2,1);}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -81,8 +83,8 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
 .plbl{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--t3);font-weight:500;}
 .pcard{width:100%;border-radius:28px;padding:36px 26px 32px;text-align:center;position:relative;overflow:hidden;transition:background .5s,box-shadow .5s,border .5s;}
 .pphw{position:relative;width:86px;height:86px;margin:0 auto 14px;}
-.prg{position:absolute;inset:-4px;border-radius:50%;animation:sp 6s linear infinite;}
-.prg2{position:absolute;inset:-3px;border-radius:50%;animation:sp 9s linear infinite reverse;opacity:.5;}
+.prg{position:absolute;inset:-4px;border-radius:50%;animation:sp 6s linear infinite;will-change:transform;}
+.prg2{position:absolute;inset:-3px;border-radius:50%;animation:sp 9s linear infinite reverse;opacity:.5;will-change:transform;}
 @keyframes sp{to{transform:rotate(360deg);}}
 .ppi{position:relative;z-index:2;width:100%;height:100%;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:30px;border:2.5px solid rgba(15,11,26,.8);}
 .ppi img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;}
@@ -136,9 +138,9 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
     <!-- Text -->
     <div class="sec">
       <div class="sh"><div class="si2">✍️</div><div><div class="st">Text & Message</div><div class="ss">Naam, wish aur ek khaas message</div></div></div>
-      <div class="fld"><label>Naam</label><input class="inp" type="text" id="ni" placeholder="Jis ko card bhejni hai uska naam" oninput="upP()"></div>
-      <div class="fld"><label>Wish Line</label><input class="inp" type="text" id="wi" value="Happy Birthday 🌺" oninput="upP()"></div>
-      <div class="fld" style="margin-bottom:0"><label>Message</label><input class="inp" type="text" id="mi" placeholder="Tu hamesha shine kare ✨" oninput="upP()"></div>
+      <div class="fld"><label>Naam</label><input class="inp" type="text" id="ni" placeholder="Jis ko card bhejni hai uska naam" oninput="debouncedUpP()"></div>
+      <div class="fld"><label>Wish Line</label><input class="inp" type="text" id="wi" value="Happy Birthday 🌺" oninput="debouncedUpP()"></div>
+      <div class="fld" style="margin-bottom:0"><label>Message</label><input class="inp" type="text" id="mi" placeholder="Tu hamesha shine kare ✨" oninput="debouncedUpP()"></div>
     </div>
     <!-- Photo -->
     <div class="sec">
@@ -151,9 +153,9 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
         </div>
         <div class="cp">
           <div class="ci" id="ci">Circle pe <b>+ click</b> karo photo select karne ke liye</div>
-          <div class="sw"><div class="slr"><span>🔍 Zoom</span><span id="zv">1.2×</span></div><input type="range" id="zs" min="100" max="300" value="120" disabled oninput="upC();upZV()"></div>
-          <div class="sw"><div class="slr"><span>↔ Left / Right</span></div><input type="range" id="xs" min="-100" max="100" value="0" disabled oninput="upC()"></div>
-          <div class="sw"><div class="slr"><span>↕ Up / Down</span></div><input type="range" id="ys" min="-100" max="100" value="0" disabled oninput="upC()"></div>
+          <div class="sw"><div class="slr"><span>🔍 Zoom</span><span id="zv">1.2×</span></div><input type="range" id="zs" min="100" max="300" value="120" disabled oninput="debouncedUpC();upZV()"></div>
+          <div class="sw"><div class="slr"><span>↔ Left / Right</span></div><input type="range" id="xs" min="-100" max="100" value="0" disabled oninput="debouncedUpC()"></div>
+          <div class="sw"><div class="slr"><span>↕ Up / Down</span></div><input type="range" id="ys" min="-100" max="100" value="0" disabled oninput="debouncedUpC()"></div>
           <div class="ps" id="ps"></div>
         </div>
       </div>
@@ -192,6 +194,12 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
   </div>
 </div>
 <script>
+// Debounce utilities
+let _upPTimer=null;
+function debouncedUpP(){clearTimeout(_upPTimer);_upPTimer=setTimeout(upP,80);}
+let _upCTimer=null;
+function debouncedUpC(){clearTimeout(_upCTimer);_upCTimer=setTimeout(upC,30);}
+
 const TH={
   night: {n:'Raat',   bg:'#0d0520',bg2:'#060312',mid:'#1a0a3e',a:'#a78bfa',a2:'#e879f9',g:'linear-gradient(160deg,#1a0a3e,#060312)',pc:['#a78bfa','#e879f9','#38bdf8','#f5c842','#34d399']},
   rose:  {n:'Gulaab', bg:'#1a0010',bg2:'#0e0008',mid:'#5e0030',a:'#ff6b9d',a2:'#f5c842',g:'linear-gradient(160deg,#5e0030,#0e0008)',pc:['#ff6b9d','#f5c842','#fb7185','#fda4af']},

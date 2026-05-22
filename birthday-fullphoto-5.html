@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>Cinematic Birthday Card | WishCard.in</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -132,7 +134,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 .cc-mood{position:absolute;inset:0;transition:background .5s;}
 .cc-fade{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.96) 0%,rgba(0,0,0,0.2) 50%,transparent 68%);}
 .cc-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
-.pt{position:absolute;opacity:0;animation:ptf var(--fd) linear var(--fd2) infinite;}
+.pt{position:absolute;opacity:0;animation:ptf var(--fd) linear var(--fd2) infinite;will-change:transform,opacity;}
 @keyframes ptf{0%{transform:translateY(-10px) rotate(0);opacity:0;}8%{opacity:.8;}100%{transform:translateY(101%) rotate(540deg);opacity:0;}}
 
 /* Text panel layout */
@@ -195,24 +197,24 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       <div class="sliders-wrap">
         <div class="sw">
           <div class="slr"><span>🔍 Zoom</span><span id="zv">1.0×</span></div>
-          <input type="range" id="zs" min="100" max="250" value="100" disabled oninput="upC();upZV()">
+          <input type="range" id="zs" min="100" max="250" value="100" disabled oninput="debouncedUpC();upZV()">
         </div>
         <div class="sw">
           <div class="slr"><span>↔ Left / Right</span></div>
-          <input type="range" id="xs" min="-100" max="100" value="0" disabled oninput="upC()">
+          <input type="range" id="xs" min="-100" max="100" value="0" disabled oninput="debouncedUpC()">
         </div>
         <div class="sw">
           <div class="slr"><span>↕ Up / Down</span></div>
-          <input type="range" id="ys" min="-100" max="100" value="0" disabled oninput="upC()">
+          <input type="range" id="ys" min="-100" max="100" value="0" disabled oninput="debouncedUpC()">
         </div>
       </div>
     </div>
 
     <div class="sec">
       <div class="sh"><div class="sicon">✍️</div><div><div class="st">Text & Plate Settings</div><div class="ss">Customize texts and glass layers</div></div></div>
-      <div class="fld"><label>Naam *</label><input class="inp" type="text" id="ni" value="Aapka Naam" oninput="upP()"></div>
-      <div class="fld"><label>Wish Line</label><input class="inp" type="text" id="wi" value="Happy Birthday 🌺" oninput="upP()"></div>
-      <div class="fld"><label>Message</label><input class="inp" type="text" id="mi" value="Tu hamesha aise hi shine kare ✨" oninput="upP()"></div>
+      <div class="fld"><label>Naam *</label><input class="inp" type="text" id="ni" value="Aapka Naam" oninput="debouncedUpP()"></div>
+      <div class="fld"><label>Wish Line</label><input class="inp" type="text" id="wi" value="Happy Birthday 🌺" oninput="debouncedUpP()"></div>
+      <div class="fld"><label>Message</label><input class="inp" type="text" id="mi" value="Tu hamesha aise hi shine kare ✨" oninput="debouncedUpP()"></div>
       
       <div class="fld" style="margin-top:14px;">
         <label>Glass Background Plate Box</label>
@@ -262,6 +264,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 </div>
 
 <script>
+// Debounce utilities
+let _upPTimer=null;
+function debouncedUpP(){clearTimeout(_upPTimer);_upPTimer=setTimeout(upP,80);}
+let _upCTimer=null;
+function debouncedUpC(){clearTimeout(_upCTimer);_upCTimer=setTimeout(upC,30);}
+let _lastMood='';
+
 const MOODS = {
   none:   {n:'No Filter',   ov:'rgba(0,0,0,0)',        fade:'rgba(0,0,0,0.88)',  glow:'#ffffff', pc:['#ffffff','#ffe0f0','#e0e8ff','#fff0e0'], swL:'#2a2a2a', swR:'#1a1a1a'},
   raat:   {n:'Raat',        ov:'rgba(60,20,120,0.22)', fade:'rgba(10,0,30,0.92)', glow:'#a78bfa', pc:['#a78bfa','#e879f9','#818cf8','#ddd6fe'], swL:'#1a0a3e', swR:'#0d0520'},
@@ -317,7 +326,7 @@ function upC() {
   const z = parseFloat(document.getElementById('zs').value)/100;
   const x = parseFloat(document.getElementById('xs').value);
   const y = parseFloat(document.getElementById('ys').value);
-  const W=900,H=1600;
+  const W=720,H=1280;
   const cv = document.getElementById('cropCanvas');
   cv.width=W; cv.height=H;
   const ctx = cv.getContext('2d');
@@ -384,15 +393,19 @@ function upP() {
   document.getElementById('pwh').style.color = m.glow;
   document.getElementById('pmsg').textContent = document.getElementById('mi').value || '';
   
-  const pI = document.getElementById('ccParts'); pI.innerHTML = '';
-  m.pc.forEach(c => {
-    for(let j=0;j<3;j++){
-      const el = document.createElement('div'); el.className = 'pt';
-      const w = Math.random()*5+3;
-      el.style.cssText = `left:${Math.random()*100}%;width:${w}px;height:${w}px;border-radius:${Math.random()>.5?'0 50% 0 50%':'50%'};background:${c};--fd:${(Math.random()*8+6).toFixed(1)}s;--fd2:${(Math.random()*10).toFixed(1)}s;`;
-      pI.appendChild(el);
-    }
-  });
+  // Only rebuild particles when mood changes (expensive DOM operation)
+  if(_lastMood!==cM){
+    const pI = document.getElementById('ccParts'); pI.innerHTML = '';
+    m.pc.forEach(c => {
+      for(let j=0;j<3;j++){
+        const el = document.createElement('div'); el.className = 'pt';
+        const w = Math.random()*5+3;
+        el.style.cssText = `left:${Math.random()*100}%;width:${w}px;height:${w}px;border-radius:${Math.random()>.5?'0 50% 0 50%':'50%'};background:${c};--fd:${(Math.random()*8+6).toFixed(1)}s;--fd2:${(Math.random()*10).toFixed(1)}s;`;
+        pI.appendChild(el);
+      }
+    });
+    _lastMood=cM;
+  }
 }
 
 function syncMP(){
