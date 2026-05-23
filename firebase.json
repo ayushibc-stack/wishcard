@@ -1,0 +1,28 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [".git", "node_modules", ".github", ".agents", "firebase-debug.log", ".firebaserc"],
+    "rewrites": [
+      {
+        "source": "/card/**",
+        "destination": "/share.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.html",
+        "headers": [{"key": "Cache-Control", "value": "no-cache"}]
+      },
+      {
+        "source": "js/**",
+        "headers": [{"key": "Cache-Control", "value": "max-age=3600"}]
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}
