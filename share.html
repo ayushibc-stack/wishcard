@@ -267,6 +267,41 @@ html, body {
   height: 16px;
   fill: currentColor;
 }
+
+/* Toast Notification */
+.video-toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(34, 197, 94, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 24px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Outfit', sans-serif;
+  z-index: 80;
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  white-space: nowrap;
+}
+
+.video-toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.video-toast svg {
+  flex-shrink: 0;
+  fill: #22c55e;
+}
 </style>
 </head>
 <body>
@@ -306,15 +341,15 @@ html, body {
     <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
     <span>Skip to Card</span>
   </button>
-  <a class="float-btn" id="downloadBtn" download>
+  <a class="float-btn" id="downloadBtn" download="wishcard-video.mp4">
     <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-    <span>Download Video</span>
+    <span>Save Video</span>
   </a>
 </div>
 
 <script type="module">
 import { db } from './js/firebase-config.js';
-import { doc, getDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { doc, getDoc, updateDoc, increment, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // DOM elements
 const loadingScreen = document.getElementById('loadingScreen');
@@ -333,6 +368,9 @@ const downloadBtn = document.getElementById('downloadBtn');
 // Parse cardId from URL: /card/abc123 -> "abc123"
 const pathParts = window.location.pathname.split('/');
 const cardId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+
+// Snapshot unsubscribe function
+let unsubscribeSnapshot = null;
 
 function showError(title, message, btnText, btnAction) {
   loadingScreen.classList.add('hidden');
@@ -365,6 +403,103 @@ function showCardImmediate(htmlUrl) {
   cardIframe.src = htmlUrl;
 }
 
+function showToast(message) {
+  // Remove existing toast if any
+  const existing = document.getElementById('videoToast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'videoToast';
+  toast.className = 'video-toast';
+  toast.innerHTML = `
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    <span>${message}</span>
+  `;
+  document.body.appendChild(toast);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    toast.classList.add('visible');
+  });
+
+  // Auto-dismiss after 5 seconds
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => toast.remove(), 400);
+  }, 5000);
+}
+
+function showDownloadButton(videoUrl, recipientName) {
+  const filename = recipientName
+    ? `${recipientName.replace(/[^a-zA-Z0-9]/g, '-')}-wishcard.mp4`
+    : 'wishcard-video.mp4';
+  downloadBtn.href = videoUrl;
+  downloadBtn.setAttribute('download', filename);
+  downloadBtn.classList.add('visible');
+}
+
+function setupVideoPlayer(videoUrl, htmlUrl) {
+  loadingScreen.classList.add('hidden');
+  videoSection.classList.add('active');
+  skipBtn.classList.add('visible');
+
+  // Setup download button
+  showDownloadButton(videoUrl, null);
+
+  videoPlayer.src = videoUrl;
+  videoPlayer.muted = true;
+  videoPlayer.playsInline = true;
+
+  // Attempt autoplay (muted)
+  videoPlayer.play().catch((e) => {
+    console.warn('Autoplay blocked:', e);
+  });
+
+  // Unmute handler
+  unmuteBtn.addEventListener('click', () => {
+    videoPlayer.muted = false;
+    unmuteBtn.classList.add('hidden');
+  });
+
+  // When video ends, transition to card
+  videoPlayer.addEventListener('ended', () => {
+    showCard(htmlUrl);
+  });
+
+  // Video error - skip to card
+  videoPlayer.addEventListener('error', () => {
+    showCard(htmlUrl);
+  });
+
+  // Skip button
+  skipBtn.addEventListener('click', () => {
+    videoPlayer.pause();
+    showCard(htmlUrl);
+  });
+}
+
+function startVideoStatusListener(cardRef, htmlUrl, recipientName) {
+  unsubscribeSnapshot = onSnapshot(cardRef, (snapshot) => {
+    if (!snapshot.exists()) return;
+
+    const data = snapshot.data();
+    const { videoStatus, videoUrl } = data;
+
+    if (videoStatus === 'ready' && videoUrl) {
+      // Video is ready - show download button and toast
+      showDownloadButton(videoUrl, recipientName);
+      showToast('Video ready! Tap to download');
+
+      // Unsubscribe since we got what we need
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+        unsubscribeSnapshot = null;
+      }
+    }
+    // For 'failed' status, do nothing - keep showing the HTML card
+  });
+}
+
 async function loadCard() {
   if (!cardId) {
     showError('Card nahi mili', 'Shayad link galat hai. Please check the link you received.', 'Go to WishCard.in', null);
@@ -390,62 +525,27 @@ async function loadCard() {
       console.warn('Could not update openCount:', e);
     }
 
-    const { videoUrl, htmlUrl } = cardData;
+    const { videoUrl, htmlUrl, videoStatus, recipientName } = cardData;
 
     if (!htmlUrl) {
       showError('Oops!', 'Card content not available. Please try again later.', 'Go to WishCard.in', null);
       return;
     }
 
-    // If video exists, play it first
-    if (videoUrl) {
-      loadingScreen.classList.add('hidden');
-      videoSection.classList.add('active');
-      skipBtn.classList.add('visible');
+    // If video is already ready, play it first then transition to card
+    if (videoStatus === 'ready' && videoUrl) {
+      setupVideoPlayer(videoUrl, htmlUrl);
 
-      // Setup download button
-      downloadBtn.href = videoUrl;
-      downloadBtn.classList.add('visible');
-
-      videoPlayer.src = videoUrl;
-      videoPlayer.muted = true;
-      videoPlayer.playsInline = true;
-
-      // Attempt autoplay (muted)
-      try {
-        await videoPlayer.play();
-      } catch (e) {
-        // Autoplay blocked, user can tap to play
-        console.warn('Autoplay blocked:', e);
-      }
-
-      // Unmute handler
-      unmuteBtn.addEventListener('click', () => {
-        videoPlayer.muted = false;
-        unmuteBtn.classList.add('hidden');
-      });
-
-      // When video ends, transition to card
-      videoPlayer.addEventListener('ended', () => {
-        showCard(htmlUrl);
-      });
-
-      // Video error - skip to card
-      videoPlayer.addEventListener('error', () => {
-        showCard(htmlUrl);
-      });
-
-      // Skip button
-      skipBtn.addEventListener('click', () => {
-        videoPlayer.pause();
-        showCard(htmlUrl);
-      });
-
-    } else {
-      // No video, show card directly
+    } else if (videoStatus === 'pending' || videoStatus === 'processing') {
+      // Video is still rendering - show HTML card immediately
       showCardImmediate(htmlUrl);
 
-      // No download button if no video
+      // Set up real-time listener to detect when video becomes ready
+      startVideoStatusListener(cardRef, htmlUrl, recipientName);
+
+    } else {
+      // No videoStatus, or videoStatus is 'failed' - show card directly
+      showCardImmediate(htmlUrl);
     }
 
   } catch (error) {
@@ -453,6 +553,14 @@ async function loadCard() {
     showError('Kuch gadbad hai', 'Please retry karo. Check your internet connection.', 'Retry', 'retry');
   }
 }
+
+// Clean up listener on page unload
+window.addEventListener('beforeunload', () => {
+  if (unsubscribeSnapshot) {
+    unsubscribeSnapshot();
+    unsubscribeSnapshot = null;
+  }
+});
 
 loadCard();
 </script>
