@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>You have a special wish! | WishCard.in</title>
+
+<!-- OG Meta Tags for WhatsApp/Social Preview -->
+<meta property="og:title" content="Someone made a special card for you!">
+<meta property="og:description" content="Open to see your personalized greeting card with love. Made on WishCard.in">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WishCard.in">
+<meta property="og:image" content="https://wishcard-in.web.app/og-preview.png">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Someone made a special card for you!">
+<meta name="twitter:description" content="Open to see your personalized greeting card with love.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Outfit', sans-serif;
+  background: #05020a;
+  color: #fff;
+}
+
+/* Loading Screen */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #05020a;
+  z-index: 100;
+  transition: opacity 0.5s ease;
+}
+
+.loading-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 4px solid rgba(168, 85, 247, 0.2);
+  border-top-color: #a855f7;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+}
+
+.loading-brand {
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(168, 85, 247, 0.6);
+}
+
+/* Video Section */
+.video-section {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: #05020a;
+  z-index: 50;
+  transition: opacity 0.5s ease;
+}
+
+.video-section.active {
+  display: flex;
+}
+
+.video-section.fade-out {
+  opacity: 0;
+}
+
+.video-section video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.unmute-overlay {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: 60;
+}
+
+.unmute-overlay:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.unmute-overlay svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.unmute-overlay.hidden {
+  display: none;
+}
+
+/* Card Section */
+.card-section {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 40;
+  background: #05020a;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.card-section.active {
+  display: block;
+  opacity: 1;
+}
+
+.card-section iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Error Section */
+.error-section {
+  position: fixed;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #05020a;
+  z-index: 90;
+  padding: 24px;
+  text-align: center;
+}
+
+.error-section.active {
+  display: flex;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.error-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.error-message {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 24px;
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+.error-btn {
+  padding: 12px 28px;
+  background: rgba(168, 85, 247, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 24px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Outfit', sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.error-btn:hover {
+  background: rgba(168, 85, 247, 0.35);
+}
+
+/* Floating Buttons */
+.floating-buttons {
+  position: fixed;
+  bottom: 24px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  z-index: 70;
+  padding: 0 16px;
+}
+
+.float-btn {
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Outfit', sans-serif;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s, transform 0.2s;
+  text-decoration: none;
+}
+
+.float-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.float-btn.visible {
+  display: flex;
+}
+
+.float-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+</style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading your special card...</div>
+  <div class="loading-brand">WishCard.in</div>
+</div>
+
+<!-- Video Section -->
+<div class="video-section" id="videoSection">
+  <video id="videoPlayer" playsinline></video>
+  <div class="unmute-overlay" id="unmuteBtn">
+    <svg viewBox="0 0 24 24"><path d="M3.63 3.63a.996.996 0 0 0 0 1.41L7.29 8.7 7 9H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71v-4.17l4.18 4.18c-.49.37-1.02.68-1.6.91-.36.15-.58.53-.58.92 0 .72.73 1.18 1.39.91.8-.33 1.55-.77 2.22-1.31l1.34 1.34a.996.996 0 1 0 1.41-1.41L5.05 3.63c-.39-.39-1.02-.39-1.42 0zM19 12c0 .82-.15 1.61-.41 2.34l1.53 1.53c.56-1.17.88-2.48.88-3.87 0-3.83-2.4-7.11-5.78-8.4-.59-.23-1.22.23-1.22.86v.19c0 .38.25.71.61.85C17.18 6.54 19 9.06 19 12zm-8.71-6.29l-.17.17L12 7.76V6.41c0-.89-1.08-1.33-1.71-.7zM16.5 12A4.5 4.5 0 0 0 14 7.97v1.79l2.48 2.48c.01-.08.02-.16.02-.24z"/></svg>
+    <span>Tap to unmute</span>
+  </div>
+</div>
+
+<!-- Card Section -->
+<div class="card-section" id="cardSection">
+  <iframe id="cardIframe" sandbox="allow-scripts allow-same-origin" title="Your greeting card"></iframe>
+</div>
+
+<!-- Error Section -->
+<div class="error-section" id="errorSection">
+  <div class="error-icon">&#128542;</div>
+  <div class="error-title" id="errorTitle">Oops!</div>
+  <div class="error-message" id="errorMessage"></div>
+  <a class="error-btn" id="errorBtn" href="https://wishcard.in">Go to WishCard.in</a>
+</div>
+
+<!-- Floating Buttons -->
+<div class="floating-buttons" id="floatingButtons">
+  <button class="float-btn" id="skipBtn">
+    <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
+    <span>Skip to Card</span>
+  </button>
+  <a class="float-btn" id="downloadBtn" download>
+    <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    <span>Download Video</span>
+  </a>
+</div>
+
+<script type="module">
+import { db } from './js/firebase-config.js';
+import { doc, getDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// DOM elements
+const loadingScreen = document.getElementById('loadingScreen');
+const videoSection = document.getElementById('videoSection');
+const videoPlayer = document.getElementById('videoPlayer');
+const unmuteBtn = document.getElementById('unmuteBtn');
+const cardSection = document.getElementById('cardSection');
+const cardIframe = document.getElementById('cardIframe');
+const errorSection = document.getElementById('errorSection');
+const errorTitle = document.getElementById('errorTitle');
+const errorMessage = document.getElementById('errorMessage');
+const errorBtn = document.getElementById('errorBtn');
+const skipBtn = document.getElementById('skipBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+
+// Parse cardId from URL: /card/abc123 -> "abc123"
+const pathParts = window.location.pathname.split('/');
+const cardId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+
+function showError(title, message, btnText, btnAction) {
+  loadingScreen.classList.add('hidden');
+  videoSection.classList.remove('active');
+  cardSection.classList.remove('active');
+  errorSection.classList.add('active');
+  errorTitle.textContent = title;
+  errorMessage.textContent = message;
+  if (btnText) errorBtn.textContent = btnText;
+  if (btnAction === 'retry') {
+    errorBtn.href = '#';
+    errorBtn.onclick = (e) => { e.preventDefault(); location.reload(); };
+  }
+}
+
+function showCard(htmlUrl) {
+  videoSection.classList.add('fade-out');
+  skipBtn.classList.remove('visible');
+  setTimeout(() => {
+    videoSection.classList.remove('active');
+    videoSection.classList.remove('fade-out');
+    cardSection.classList.add('active');
+    cardIframe.src = htmlUrl;
+  }, 500);
+}
+
+function showCardImmediate(htmlUrl) {
+  loadingScreen.classList.add('hidden');
+  cardSection.classList.add('active');
+  cardIframe.src = htmlUrl;
+}
+
+async function loadCard() {
+  if (!cardId) {
+    showError('Card nahi mili', 'Shayad link galat hai. Please check the link you received.', 'Go to WishCard.in', null);
+    return;
+  }
+
+  try {
+    const cardRef = doc(db, 'cards', cardId);
+    const cardSnap = await getDoc(cardRef);
+
+    if (!cardSnap.exists()) {
+      showError('Card nahi mili', 'Shayad link galat hai. Please check the link you received.', 'Go to WishCard.in', null);
+      return;
+    }
+
+    const cardData = cardSnap.data();
+
+    // Increment openCount for analytics
+    try {
+      await updateDoc(cardRef, { openCount: increment(1) });
+    } catch (e) {
+      // Analytics increment failure should not block card viewing
+      console.warn('Could not update openCount:', e);
+    }
+
+    const { videoUrl, htmlUrl } = cardData;
+
+    if (!htmlUrl) {
+      showError('Oops!', 'Card content not available. Please try again later.', 'Go to WishCard.in', null);
+      return;
+    }
+
+    // If video exists, play it first
+    if (videoUrl) {
+      loadingScreen.classList.add('hidden');
+      videoSection.classList.add('active');
+      skipBtn.classList.add('visible');
+
+      // Setup download button
+      downloadBtn.href = videoUrl;
+      downloadBtn.classList.add('visible');
+
+      videoPlayer.src = videoUrl;
+      videoPlayer.muted = true;
+      videoPlayer.playsInline = true;
+
+      // Attempt autoplay (muted)
+      try {
+        await videoPlayer.play();
+      } catch (e) {
+        // Autoplay blocked, user can tap to play
+        console.warn('Autoplay blocked:', e);
+      }
+
+      // Unmute handler
+      unmuteBtn.addEventListener('click', () => {
+        videoPlayer.muted = false;
+        unmuteBtn.classList.add('hidden');
+      });
+
+      // When video ends, transition to card
+      videoPlayer.addEventListener('ended', () => {
+        showCard(htmlUrl);
+      });
+
+      // Video error - skip to card
+      videoPlayer.addEventListener('error', () => {
+        showCard(htmlUrl);
+      });
+
+      // Skip button
+      skipBtn.addEventListener('click', () => {
+        videoPlayer.pause();
+        showCard(htmlUrl);
+      });
+
+    } else {
+      // No video, show card directly
+      showCardImmediate(htmlUrl);
+
+      // No download button if no video
+    }
+
+  } catch (error) {
+    console.error('Error loading card:', error);
+    showError('Kuch gadbad hai', 'Please retry karo. Check your internet connection.', 'Retry', 'retry');
+  }
+}
+
+loadCard();
+</script>
+</body>
+</html>

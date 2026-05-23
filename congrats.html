@@ -307,6 +307,13 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
 </div>
 </div>
 
+<script type="module">
+import { showCardPreview, shareCard, showShareUI } from './js/card-share.js';
+import './js/firebase-config.js';
+window._showCardPreview = showCardPreview;
+window._shareCard = shareCard;
+window._showShareUI = showShareUI;
+</script>
 <script>
 // ── UTILITIES ──
 let _upPTimer=null;
@@ -771,13 +778,36 @@ function handleHDSave(){
 </body>
 </html>`;
 
-  const bl=new Blob([html],{type:'text/html;charset=utf-8'});
-  const ur=URL.createObjectURL(bl);
-  const a=document.createElement('a');
-  a.href=ur; a.download='congrats_'+sn+'.html';
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(ur),1000);
+  // Show preview with share options
+  if (window._showCardPreview) {
+    const downloadFn = function() {
+      const bl = new Blob([html], {type: 'text/html;charset=utf-8'});
+      const ur = URL.createObjectURL(bl);
+      const a = document.createElement('a');
+      a.href = ur; a.download = 'congrats_' + sn + '.html';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(ur), 1000);
+    };
+    const o = OCCASIONS.find(x => x.k === cOcc) || OCCASIONS[0];
+    window._showCardPreview(html, {
+      recipientName: document.getElementById('ni').value.trim() || 'Friend',
+      cardType: 'congrats',
+      occasion: o.tag || 'Congratulations',
+      thumbnailDataUrl: cropData || null,
+      colors: { primary: THEMES[cTheme].sw, secondary: THEMES[cTheme].swLine, accent: THEMES[cTheme].glow, glow: THEMES[cTheme].g2, particles: THEMES[cTheme].glow },
+      downloadFn: downloadFn
+    });
+  } else {
+    // Fallback: direct download if module not loaded
+    const bl = new Blob([html], {type: 'text/html;charset=utf-8'});
+    const ur = URL.createObjectURL(bl);
+    const a = document.createElement('a');
+    a.href = ur; a.download = 'congrats_' + sn + '.html';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(ur), 1000);
+  }
   upS(4);
 }
 
