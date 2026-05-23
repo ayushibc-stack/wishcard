@@ -317,6 +317,14 @@ export function showCardPreview(htmlContent, metadata = {}) {
     modal.remove();
   });
 
+  // Download button handler
+  document.getElementById('wc-preview-download-btn').addEventListener('click', () => {
+    if (metadata.downloadFn) {
+      metadata.downloadFn();
+      modal.remove();
+    }
+  });
+
   return modal;
 }
 
