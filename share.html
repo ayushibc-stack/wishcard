@@ -436,6 +436,26 @@ function showDownloadButton(videoUrl, recipientName) {
   downloadBtn.href = videoUrl;
   downloadBtn.setAttribute('download', filename);
   downloadBtn.classList.add('visible');
+
+  // Use fetch-then-blob approach to bypass cross-origin download restriction
+  downloadBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(videoUrl);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      // Fallback: open in new tab
+      window.open(videoUrl, '_blank');
+    }
+  });
 }
 
 function setupVideoPlayer(videoUrl, htmlUrl) {

@@ -11,23 +11,27 @@ const path = require("path");
 
 initializeApp();
 
-const FRAMES_DIR = "/tmp/frames";
-const OUTPUT_PATH = "/tmp/output.mp4";
-const FPS = 30;
+const FPS = 10;
 const DURATION_SECONDS = 10;
 const TOTAL_FRAMES = FPS * DURATION_SECONDS;
-const FRAME_INTERVAL = 1000 / FPS;
 
 /**
  * Encodes captured frames into an MP4 video using FFmpeg.
+ * @param {string} framesDir - Path to directory containing frame PNGs.
+ * @param {string} outputPath - Path for the output MP4 file.
  * @return {Promise<void>} Resolves when encoding is complete.
  */
-function encodeFramesToVideo() {
+function encodeFramesToVideo(framesDir, outputPath) {
   return new Promise((resolve, reject) => {
+    if (!fs.existsSync(ffmpegPath)) {
+      reject(new Error(`ffmpeg binary not found at: ${ffmpegPath}`));
+      return;
+    }
+
     ffmpeg.setFfmpegPath(ffmpegPath);
 
     ffmpeg()
-        .input(path.join(FRAMES_DIR, "frame-%03d.png"))
+        .input(path.join(framesDir, "frame-%03d.png"))
         .inputFPS(FPS)
         .videoCodec("libx264")
         .size("1080x1920")
@@ -35,7 +39,7 @@ function encodeFramesToVideo() {
           "-pix_fmt yuv420p",
           `-r ${FPS}`,
         ])
-        .output(OUTPUT_PATH)
+        .output(outputPath)
         .on("end", () => resolve())
         .on("error", (err) => reject(err))
         .run();
@@ -44,18 +48,25 @@ function encodeFramesToVideo() {
 
 /**
  * Cleans up temporary files created during video rendering.
+ * @param {string} framesDir - Path to the frames directory.
+ * @param {string} outputPath - Path to the output MP4 file.
  */
-function cleanup() {
+function cleanup(framesDir, outputPath) {
   try {
-    if (fs.existsSync(FRAMES_DIR)) {
-      const files = fs.readdirSync(FRAMES_DIR);
+    if (fs.existsSync(framesDir)) {
+      const files = fs.readdirSync(framesDir);
       for (const file of files) {
-        fs.unlinkSync(path.join(FRAMES_DIR, file));
+        fs.unlinkSync(path.join(framesDir, file));
       }
-      fs.rmdirSync(FRAMES_DIR);
+      fs.rmdirSync(framesDir);
     }
-    if (fs.existsSync(OUTPUT_PATH)) {
-      fs.unlinkSync(OUTPUT_PATH);
+    // Remove the cardId-specific directory
+    const cardDir = path.dirname(framesDir);
+    if (fs.existsSync(cardDir) && cardDir !== "/tmp") {
+      fs.rmdirSync(cardDir);
+    }
+    if (fs.existsSync(outputPath)) {
+      fs.unlinkSync(outputPath);
     }
   } catch (err) {
     console.error("Cleanup error:", err);
@@ -75,7 +86,7 @@ exports.renderCardVideo = onDocumentCreated(
     {
       document: "cards/{cardId}",
       memory: "2GiB",
-      timeoutSeconds: 300,
+      timeoutSeconds: 540,
       region: "us-central1",
     },
     async (event) => {
@@ -87,6 +98,10 @@ exports.renderCardVideo = onDocumentCreated(
 
       const data = snapshot.data();
       const cardId = event.params.cardId;
+
+      // Use cardId-based paths to avoid collisions between concurrent invocations
+      const framesDir = `/tmp/${cardId}/frames`;
+      const outputPath = `/tmp/${cardId}/output.mp4`;
 
       if (!data.htmlUrl) {
         console.log(`Card ${cardId} has no htmlUrl, skipping video render`);
@@ -120,21 +135,18 @@ exports.renderCardVideo = onDocumentCreated(
         await delay(2000);
 
         // Create frames directory
-        if (!fs.existsSync(FRAMES_DIR)) {
-          fs.mkdirSync(FRAMES_DIR, {recursive: true});
+        if (!fs.existsSync(framesDir)) {
+          fs.mkdirSync(framesDir, {recursive: true});
         }
 
-        // Capture screenshots (30fps for 10 seconds = 300 frames)
+        // Capture screenshots as fast as possible (no inter-frame delay)
+        // At 10fps output, 100 frames produces a 10-second video
         for (let i = 1; i <= TOTAL_FRAMES; i++) {
           const frameNumber = String(i).padStart(3, "0");
           await page.screenshot({
-            path: path.join(FRAMES_DIR, `frame-${frameNumber}.png`),
+            path: path.join(framesDir, `frame-${frameNumber}.png`),
             type: "png",
           });
-
-          if (i < TOTAL_FRAMES) {
-            await delay(FRAME_INTERVAL);
-          }
         }
 
         // Close browser
@@ -142,29 +154,29 @@ exports.renderCardVideo = onDocumentCreated(
         browser = null;
 
         // Encode frames to MP4
-        await encodeFramesToVideo();
+        await encodeFramesToVideo(framesDir, outputPath);
 
         // Upload MP4 to Firebase Storage
         const bucket = getStorage().bucket();
         const storagePath = `cards/${cardId}/video.mp4`;
 
-        await bucket.upload(OUTPUT_PATH, {
+        await bucket.upload(outputPath, {
           destination: storagePath,
           metadata: {
             contentType: "video/mp4",
           },
         });
 
-        // Make the file publicly accessible
+        // Get a signed URL (works with uniform bucket-level access)
         const file = bucket.file(storagePath);
-        await file.makePublic();
-
-        // Get public URL
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${storagePath}`;
+        const [signedUrl] = await file.getSignedUrl({
+          action: "read",
+          expires: "2099-12-31",
+        });
 
         // Update Firestore with video URL and status
         await docRef.update({
-          videoUrl: publicUrl,
+          videoUrl: signedUrl,
           videoStatus: "ready",
         });
 
@@ -189,7 +201,7 @@ exports.renderCardVideo = onDocumentCreated(
         }
 
         // Clean up temporary files
-        cleanup();
+        cleanup(framesDir, outputPath);
       }
     },
 );
