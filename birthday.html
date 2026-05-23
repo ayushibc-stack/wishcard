@@ -193,6 +193,13 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
     </div>
   </div>
 </div>
+<script type="module">
+import { showCardPreview, shareCard, showShareUI } from './js/card-share.js';
+import './js/firebase-config.js';
+window._showCardPreview = showCardPreview;
+window._shareCard = shareCard;
+window._showShareUI = showShareUI;
+</script>
 <script>
 // Debounce utilities
 let _upPTimer=null;
@@ -384,11 +391,32 @@ function sHD(){
 <\/script>
 </body>
 </html>`;
-  const bl=new Blob([html],{type:'text/html;charset=utf-8'});
-  const ur=URL.createObjectURL(bl);
-  const a=document.createElement('a');a.href=ur;a.download='birthday_'+sn+'.html';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(ur),1000);upS(4);
+  // Show preview with share options
+  if (window._showCardPreview) {
+    const downloadFn = function() {
+      const bl = new Blob([html], {type: 'text/html;charset=utf-8'});
+      const ur = URL.createObjectURL(bl);
+      const a = document.createElement('a'); a.href = ur; a.download = 'birthday_' + sn + '.html';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(ur), 1000);
+    };
+    window._showCardPreview(html, {
+      recipientName: document.getElementById('ni').value.trim() || 'Friend',
+      cardType: 'birthday',
+      occasion: 'Birthday',
+      thumbnailDataUrl: crop || null,
+      colors: { primary: TH[cT].bg, secondary: TH[cT].mid, accent: TH[cT].a, glow: TH[cT].a2, particles: TH[cT].a },
+      downloadFn: downloadFn
+    });
+  } else {
+    // Fallback: direct download if module not loaded
+    const bl = new Blob([html], {type: 'text/html;charset=utf-8'});
+    const ur = URL.createObjectURL(bl);
+    const a = document.createElement('a'); a.href = ur; a.download = 'birthday_' + sn + '.html';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(ur), 1000);
+  }
+  upS(4);
 }
 upP();
 </script>

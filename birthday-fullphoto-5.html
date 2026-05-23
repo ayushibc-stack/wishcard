@@ -263,6 +263,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   </div>
 </div>
 
+<script type="module">
+import { showCardPreview, shareCard, showShareUI } from './js/card-share.js';
+import './js/firebase-config.js';
+window._showCardPreview = showCardPreview;
+window._shareCard = shareCard;
+window._showShareUI = showShareUI;
+</script>
 <script>
 // Debounce utilities
 let _upPTimer=null;
@@ -620,11 +627,31 @@ function sHD(){
 </body>
 </html>`;
 
-  var blob = new Blob([html], {type: 'text/html'});
-  var link = document.createElement('a');
-  link.download = 'birthday_' + sn + '_card.html';
-  link.href = URL.createObjectURL(blob);
-  link.click();
+  // Show preview with share options
+  if (window._showCardPreview) {
+    var downloadFn = function() {
+      var bl = new Blob([html], {type: 'text/html'});
+      var lnk = document.createElement('a');
+      lnk.download = 'birthday_' + sn + '_card.html';
+      lnk.href = URL.createObjectURL(bl);
+      lnk.click();
+    };
+    window._showCardPreview(html, {
+      recipientName: document.getElementById('ni').value.trim() || 'Friend',
+      cardType: 'birthday-cinematic',
+      occasion: 'Birthday',
+      thumbnailDataUrl: crop || null,
+      colors: { primary: m.swL, secondary: m.swR, accent: m.glow, glow: m.glow, particles: m.glow },
+      downloadFn: downloadFn
+    });
+  } else {
+    // Fallback: direct download if module not loaded
+    var blob = new Blob([html], {type: 'text/html'});
+    var link = document.createElement('a');
+    link.download = 'birthday_' + sn + '_card.html';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+  }
 }
 </script>
 </body>
