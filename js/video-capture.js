@@ -302,7 +302,6 @@ function recordCanvasAnimation({ width, height, duration, mimeType, cardInfo, ph
       ctx.clearRect(0, 0, width, height);
 
       // Animated background gradient (slight shift over time)
-      const hueShift = Math.sin(elapsed / 3000) * 10;
       const bgGrad = ctx.createLinearGradient(0, 0, width * (0.5 + 0.5 * Math.sin(elapsed / 5000)), height);
       bgGrad.addColorStop(0, cardInfo.colors.primary || '#1a0533');
       bgGrad.addColorStop(0.5, cardInfo.colors.secondary || '#2d1b69');
