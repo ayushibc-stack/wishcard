@@ -4,14 +4,14 @@
 import { db, storage } from './firebase-config.js';
 import { collection, doc, setDoc, getDoc, updateDoc, increment, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
-import { captureCardVideo, generateThumbnail } from './video-capture.js';
+import { generateThumbnail } from './video-capture.js';
 
 /**
  * Main share function - handles the entire flow:
- * 1. Generate video from card
- * 2. Upload HTML, video, thumbnail to Storage
- * 3. Create Firestore document
- * 4. Return shareable link
+ * 1. Generate thumbnail
+ * 2. Upload HTML and thumbnail to Storage
+ * 3. Create Firestore document with videoStatus: 'pending'
+ * 4. Return shareable link immediately
  */
 export async function shareCard({ htmlContent, thumbnailDataUrl, cardType, recipientName, occasion, colors }) {
   const progressUI = showProgressUI();
@@ -20,21 +20,7 @@ export async function shareCard({ htmlContent, thumbnailDataUrl, cardType, recip
     // Generate unique card ID
     const cardId = generateCardId();
 
-    // Step 1: Record video
-    const hasMediaRecorder = typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('video/webm');
-    let videoBlob = null;
-
-    if (hasMediaRecorder) {
-      progressUI.updateStep('recording');
-      const videoResult = await captureCardVideo(htmlContent, {
-        recipientName,
-        photoDataUrl: thumbnailDataUrl,
-        colors: colors || null
-      });
-      videoBlob = videoResult.videoBlob; // May be null if recording failed
-    }
-
-    // Step 2: Generate thumbnail
+    // Step 1: Generate thumbnail
     progressUI.updateStep('thumbnail');
     let thumbnailBlob = null;
     try {
@@ -50,16 +36,15 @@ export async function shareCard({ htmlContent, thumbnailDataUrl, cardType, recip
       }
     }
 
-    // Step 3: Upload files to Firebase Storage
+    // Step 2: Upload files to Firebase Storage
     progressUI.updateStep('uploading');
 
     const uploadResults = await uploadCardFiles(cardId, {
       htmlContent,
-      videoBlob,
       thumbnailBlob
     });
 
-    // Step 4: Create Firestore document
+    // Step 3: Create Firestore document
     progressUI.updateStep('saving');
 
     const cardDoc = {
@@ -69,14 +54,15 @@ export async function shareCard({ htmlContent, thumbnailDataUrl, cardType, recip
       occasion: occasion || '',
       createdAt: serverTimestamp(),
       openCount: 0,
-      videoUrl: uploadResults.videoUrl || null,
+      videoStatus: 'pending',
+      videoUrl: null,
       thumbnailUrl: uploadResults.thumbnailUrl || null,
       htmlUrl: uploadResults.htmlUrl || null
     };
 
     await setDoc(doc(db, 'cards', cardId), cardDoc);
 
-    // Step 5: Done!
+    // Step 4: Done!
     progressUI.updateStep('done');
 
     setTimeout(() => {
@@ -194,7 +180,6 @@ export function showProgressUI() {
   }
 
   const steps = [
-    { id: 'recording', label: 'Video record ho raha hai...' },
     { id: 'thumbnail', label: 'Thumbnail bana rahe hain...' },
     { id: 'uploading', label: 'Card upload ho raha hai...' },
     { id: 'saving', label: 'Link generate ho raha hai...' },
@@ -392,21 +377,14 @@ function generateCardId() {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 10);
 }
 
-async function uploadCardFiles(cardId, { htmlContent, videoBlob, thumbnailBlob }) {
-  const results = { htmlUrl: null, videoUrl: null, thumbnailUrl: null };
+async function uploadCardFiles(cardId, { htmlContent, thumbnailBlob }) {
+  const results = { htmlUrl: null, thumbnailUrl: null };
 
   // Upload HTML card
   const htmlRef = ref(storage, `cards/${cardId}/card.html`);
   const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
   await uploadBytes(htmlRef, htmlBlob, { contentType: 'text/html' });
   results.htmlUrl = await getDownloadURL(htmlRef);
-
-  // Upload video (if available)
-  if (videoBlob) {
-    const videoRef = ref(storage, `cards/${cardId}/video.webm`);
-    await uploadBytes(videoRef, videoBlob, { contentType: 'video/webm' });
-    results.videoUrl = await getDownloadURL(videoRef);
-  }
 
   // Upload thumbnail (if available)
   if (thumbnailBlob) {
