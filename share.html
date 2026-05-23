@@ -313,21 +313,8 @@ html, body {
 </div>
 
 <script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, doc, getDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-// Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyDZPMrtoyLSchDuFB9pUZrQflNCDbGNHUY",
-  authDomain: "wishcard-in.firebaseapp.com",
-  projectId: "wishcard-in",
-  storageBucket: "wishcard-in.firebasestorage.app",
-  messagingSenderId: "1065655743578",
-  appId: "1:1065655743578:web:77913e4fece55b0fff9463"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+import { db } from './js/firebase-config.js';
+import { doc, getDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // DOM elements
 const loadingScreen = document.getElementById('loadingScreen');

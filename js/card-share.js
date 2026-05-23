@@ -21,14 +21,18 @@ export async function shareCard({ htmlContent, thumbnailDataUrl, cardType, recip
     const cardId = generateCardId();
 
     // Step 1: Record video
-    progressUI.updateStep('recording');
-    const videoResult = await captureCardVideo(htmlContent, {
-      recipientName,
-      photoDataUrl: thumbnailDataUrl,
-      colors: colors || null
-    });
+    const hasMediaRecorder = typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('video/webm');
+    let videoBlob = null;
 
-    const videoBlob = videoResult.videoBlob; // May be null if recording failed
+    if (hasMediaRecorder) {
+      progressUI.updateStep('recording');
+      const videoResult = await captureCardVideo(htmlContent, {
+        recipientName,
+        photoDataUrl: thumbnailDataUrl,
+        colors: colors || null
+      });
+      videoBlob = videoResult.videoBlob; // May be null if recording failed
+    }
 
     // Step 2: Generate thumbnail
     progressUI.updateStep('thumbnail');
@@ -309,6 +313,8 @@ export function showCardPreview(htmlContent, metadata = {}) {
     });
     if (result.success) {
       showShareUI(result.cardId, recipientName, cardType);
+    } else {
+      showErrorToast(result.error || 'Share failed. Please try again.');
     }
   });
 
@@ -329,6 +335,54 @@ export function showCardPreview(htmlContent, metadata = {}) {
 }
 
 // --- Internal helpers ---
+
+/**
+ * Show a floating error toast notification
+ */
+function showErrorToast(message) {
+  const existing = document.getElementById('wishcard-error-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'wishcard-error-toast';
+  toast.style.cssText = `
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    background: rgba(220, 38, 38, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    border-radius: 12px;
+    padding: 14px 24px;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 999999;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    max-width: 90vw;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.3);
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+  });
+
+  // Auto-hide after 4 seconds
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(-10px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
 
 function generateCardId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
