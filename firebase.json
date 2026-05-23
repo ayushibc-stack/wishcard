@@ -1,7 +1,7 @@
 {
   "hosting": {
     "public": ".",
-    "ignore": [".git", "node_modules", ".github", ".agents", "firebase-debug.log", ".firebaserc"],
+    "ignore": [".git", "node_modules", ".github", ".agents", "firebase-debug.log", ".firebaserc", "functions"],
     "rewrites": [
       {
         "source": "/card/**",
@@ -19,6 +19,18 @@
       }
     ]
   },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ]
+    }
+  ],
   "firestore": {
     "rules": "firestore.rules"
   },
