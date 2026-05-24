@@ -173,7 +173,7 @@ html, body {
 
 <!-- Card Section -->
 <div class="card-section" id="cardSection">
-  <iframe id="cardIframe" sandbox="allow-scripts allow-same-origin" title="Your greeting card"></iframe>
+  <iframe id="cardIframe" sandbox="allow-scripts" title="Your greeting card"></iframe>
 </div>
 
 <!-- Error Section -->
@@ -214,10 +214,18 @@ function showError(title, message, btnText, btnAction) {
   }
 }
 
-function showCardImmediate(htmlUrl) {
-  loadingScreen.classList.add('hidden');
-  cardSection.classList.add('active');
-  cardIframe.src = htmlUrl;
+async function showCardImmediate(htmlUrl) {
+  try {
+    const response = await fetch(htmlUrl);
+    if (!response.ok) throw new Error('Failed to fetch card: ' + response.status);
+    const htmlContent = await response.text();
+    loadingScreen.classList.add('hidden');
+    cardSection.classList.add('active');
+    cardIframe.srcdoc = htmlContent;
+  } catch (err) {
+    console.error('Failed to load card content:', err);
+    showError('Card load nahi ho raha', 'Internet connection check karo aur retry karo.', 'Retry', 'retry');
+  }
 }
 
 async function loadCard() {
@@ -226,11 +234,20 @@ async function loadCard() {
     return;
   }
 
+  let timedOut = false;
+  const timeout = setTimeout(() => {
+    timedOut = true;
+    showError('Loading mein time lag raha hai', 'Internet slow hai ya card load nahi ho raha. Please retry karo.', 'Retry', 'retry');
+  }, 15000);
+
   try {
     const cardRef = doc(db, 'cards', cardId);
     const cardSnap = await getDoc(cardRef);
 
+    if (timedOut) return;
+
     if (!cardSnap.exists()) {
+      clearTimeout(timeout);
       showError('Card nahi mili', 'Shayad link galat hai. Please check the link you received.', 'Go to WishCard.in', null);
       return;
     }
@@ -241,21 +258,26 @@ async function loadCard() {
     try {
       await updateDoc(cardRef, { openCount: increment(1) });
     } catch (e) {
-      // Analytics increment failure should not block card viewing
       console.warn('Could not update openCount:', e);
     }
+
+    if (timedOut) return;
 
     const { htmlUrl } = cardData;
 
     if (!htmlUrl) {
+      clearTimeout(timeout);
       showError('Oops!', 'Card content not available. Please try again later.', 'Go to WishCard.in', null);
       return;
     }
 
-    // Show card directly in iframe
-    showCardImmediate(htmlUrl);
+    // Show card directly in iframe using srcdoc
+    await showCardImmediate(htmlUrl);
+    clearTimeout(timeout);
 
   } catch (error) {
+    clearTimeout(timeout);
+    if (timedOut) return;
     console.error('Error loading card:', error);
     showError('Kuch gadbad hai', 'Please retry karo. Check your internet connection.', 'Retry', 'retry');
   }

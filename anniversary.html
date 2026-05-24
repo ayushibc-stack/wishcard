@@ -307,6 +307,12 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
 </div>
 </div>
 
+<script type="module">
+import { shareCard, showShareUI, showErrorToast } from './js/card-share.js';
+window._shareCard = shareCard;
+window._showShareUI = showShareUI;
+window._showErrorToast = showErrorToast;
+</script>
 <script>
 // DATA
 const TAGS=[
@@ -741,14 +747,126 @@ function handleHDSave(){
 </body>
 </html>`;
 
-  const bl=new Blob([html],{type:'text/html;charset=utf-8'});
-  const ur=URL.createObjectURL(bl);
-  const a=document.createElement('a');
-  a.href=ur; a.download='anniversary_'+sn+'.html';
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(ur),1000);
+  // Hide form and preview columns
+  document.querySelector('.form-col').style.display='none';
+  var pcEl=document.querySelector('.preview-col');if(pcEl)pcEl.style.display='none';
+
+  // Create card output container
+  let co=document.getElementById('cardOutput');
+  if(!co){
+    co=document.createElement('div');
+    co.id='cardOutput';
+    co.style.cssText='width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px 50px;position:relative;z-index:1;';
+    document.querySelector('.page').appendChild(co);
+  }
+  co.style.display='flex';
+
+  co.innerHTML=`
+    <div style="width:min(380px,90vw);aspect-ratio:9/16;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.1);">
+      <iframe id="previewFrame" style="width:100%;height:100%;border:none;" sandbox="allow-scripts"></iframe>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;width:min(380px,90vw);margin-top:16px;">
+      <button onclick="doHDSave()" id="hdBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.07);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:14px 24px;color:white;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;width:100%;transition:all .2s;">\u{1F4F8} HD Photo Save Karo</button>
+      <button onclick="doShareLink()" id="shareBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#25D366,#128C7E);border:none;border-radius:16px;padding:14px 24px;color:white;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;width:100%;transition:all .2s;">\u{1F517} Share Link</button>
+      <a href="#" onclick="backToEdit();return false;" style="text-align:center;color:rgba(255,255,255,0.5);font-size:12px;margin-top:6px;text-decoration:none;">\u2190 Back to Edit</a>
+    </div>
+  `;
+
+  document.getElementById('previewFrame').srcdoc=html;
+  window._generatedHTML=html;
+  window._cardMeta={recipientName:(n1&&n2?n1+' & '+n2:n1||n2||'Anniversary'), cardType:'anniversary', thumbnailDataUrl:cropData};
   upS(5);
+}
+
+function backToEdit(){
+  document.querySelector('.form-col').style.display='';
+  var pcEl=document.querySelector('.preview-col');if(pcEl)pcEl.style.display='';
+  var co=document.getElementById('cardOutput');if(co)co.style.display='none';
+}
+
+function doHDSave(){
+  var btn=document.getElementById('hdBtn');
+  btn.textContent='\u23F3 Photo ban rahi hai...';btn.disabled=true;
+  // Canvas-based HD render
+  var t=THEMES[cTheme];
+  var fn=FONTS[cFont];
+  var n1=document.getElementById('n1').value.trim();
+  var n2=document.getElementById('n2').value.trim();
+  var namesStr='';
+  if(n1&&n2) namesStr=n1+' & '+n2;
+  else if(n1) namesStr=n1;
+  else if(n2) namesStr=n2;
+  var msg=cMsg||'';
+  var sn=(n1||n2||'anniversary').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+
+  var cv=document.createElement('canvas');
+  var W=1080,H=1920;
+  cv.width=W;cv.height=H;
+  var ctx=cv.getContext('2d');
+
+  var renderLayout=function(){
+    var vign=ctx.createRadialGradient(W/2,H/2,W*0.2,W/2,H/2,H*0.7);
+    vign.addColorStop(0,'transparent');vign.addColorStop(1,'rgba(0,0,0,0.65)');
+    ctx.fillStyle=vign;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=t.ov;ctx.fillRect(0,0,W,H);
+    var fade=ctx.createLinearGradient(0,H*0.35,0,H);
+    fade.addColorStop(0,'transparent');fade.addColorStop(1,t.fade);
+    ctx.fillStyle=fade;ctx.fillRect(0,0,W,H);
+
+    var pX=70,pY=H-600,pW=W-140,pH=480,pR=32;
+    ctx.save();ctx.beginPath();
+    ctx.moveTo(pX+pR,pY);ctx.lineTo(pX+pW-pR,pY);ctx.quadraticCurveTo(pX+pW,pY,pX+pW,pY+pR);
+    ctx.lineTo(pX+pW,pY+pH-pR);ctx.quadraticCurveTo(pX+pW,pY+pH,pX+pW-pR,pY+pH);
+    ctx.lineTo(pX+pR,pY+pH);ctx.quadraticCurveTo(pX,pY+pH,pX,pY+pH-pR);
+    ctx.lineTo(pX,pY+pR);ctx.quadraticCurveTo(pX,pY,pX+pR,pY);
+    ctx.closePath();
+    ctx.fillStyle='rgba(0,0,0,0.45)';ctx.strokeStyle='rgba(255,255,255,0.12)';
+    ctx.lineWidth=3;ctx.fill();ctx.stroke();ctx.restore();
+
+    ctx.textAlign='center';
+    ctx.font="600 26px 'Outfit',sans-serif";ctx.fillStyle=t.glow+'88';
+    ctx.fillText('\u2726   ANNIVERSARY   \u2726',W/2,pY+70);
+    ctx.save();ctx.font="700 85px 'Cormorant Garamond',serif";ctx.fillStyle='#ffffff';
+    ctx.shadowColor=t.glow;ctx.shadowBlur=30;
+    ctx.fillText(namesStr||'Happy Anniversary',W/2,pY+200);ctx.restore();
+    ctx.font="400 34px 'Outfit',sans-serif";ctx.fillStyle='rgba(255,255,255,0.55)';
+    var words=msg.split(' '),line='',lineY=pY+310;
+    for(var n=0;n<words.length;n++){var testLine=line+words[n]+' ';if(ctx.measureText(testLine).width>pW-120&&n>0){ctx.fillText(line,W/2,lineY);line=words[n]+' ';lineY+=52;}else{line=testLine;}}
+    ctx.fillText(line,W/2,lineY);
+    ctx.font="300 28px 'Outfit',sans-serif";ctx.fillStyle='rgba(255,255,255,0.3)';
+    ctx.fillText('WishCard.in',W/2,H-60);
+    var a=document.createElement('a');a.download='Anniversary_Card_'+sn+'.png';a.href=cv.toDataURL('image/png',1);a.click();
+    btn.textContent='\u2705 Saved!';btn.disabled=false;
+    setTimeout(function(){btn.textContent='\u{1F4F8} HD Photo Save Karo';},3000);
+  };
+
+  if(cropData){
+    var img=new Image();
+    var timeout=setTimeout(function(){ctx.fillStyle='#1a0008';ctx.fillRect(0,0,W,H);renderLayout();},5000);
+    img.onload=function(){clearTimeout(timeout);ctx.drawImage(img,0,0,W,H);renderLayout();};
+    img.onerror=function(){clearTimeout(timeout);ctx.fillStyle='#1a0008';ctx.fillRect(0,0,W,H);renderLayout();};
+    img.src=cropData;
+  } else {
+    ctx.fillStyle='#1a0008';ctx.fillRect(0,0,W,H);renderLayout();
+  }
+}
+
+function doShareLink(){
+  var btn=document.getElementById('shareBtn');
+  btn.textContent='\u23F3 Link ban rahi hai...';btn.disabled=true;
+  window._shareCard({
+    htmlContent:window._generatedHTML,
+    thumbnailDataUrl:window._cardMeta.thumbnailDataUrl,
+    cardType:window._cardMeta.cardType,
+    recipientName:window._cardMeta.recipientName
+  }).then(function(result){
+    if(result.success){window._showShareUI(result.cardId,window._cardMeta.recipientName,window._cardMeta.cardType);}
+    else{alert('Share failed: '+(result.error||'Unknown error'));}
+    btn.textContent='\u{1F517} Share Link';btn.disabled=false;
+  }).catch(function(e){
+    alert('Error: '+e.message);
+    btn.textContent='\u{1F517} Share Link';btn.disabled=false;
+  });
 }
 
 upP();
