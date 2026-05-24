@@ -194,8 +194,10 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
   </div>
 </div>
 <script type="module">
-import { recordCardVideo } from './js/video-capture.js';
-window._recordCardVideo = recordCardVideo;
+import { shareCard, showShareUI, showErrorToast } from './js/card-share.js';
+window._shareCard = shareCard;
+window._showShareUI = showShareUI;
+window._showErrorToast = showErrorToast;
 </script>
 <script>
 // Debounce utilities
@@ -290,6 +292,10 @@ function dlCard(){
   const t=TH[cT];
   const sn=(nm||'card').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
 
+  // Build standalone HTML card
+  const ph=crop?`<img src="${crop}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">`:`<span style="font-size:42px;line-height:120px;display:block;text-align:center;">\u{1F338}</span>`;
+  var html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:${t.bg};overflow:hidden;position:relative;}@keyframes sp{to{transform:rotate(360deg);}}@keyframes bc{from{transform:translateY(0) rotate(-3deg);}to{transform:translateY(-10px) rotate(3deg);}}@keyframes sparkle{0%,100%{opacity:0;transform:scale(0.5);}50%{opacity:1;transform:scale(1.2);}}@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);}}.particle{position:absolute;border-radius:50%;opacity:0;animation:ptf var(--d) linear var(--del) infinite;}@keyframes ptf{0%{transform:translateY(-10px);opacity:0;}8%{opacity:0.7;}100%{transform:translateY(100vh);opacity:0;}}</style></head><body><div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;" id="particles"></div><div style="width:min(380px,90vw);background:${t.g};border-radius:32px;padding:44px 32px 40px;text-align:center;position:relative;border:1px solid ${t.a}40;box-shadow:0 0 80px ${t.a}22,0 24px 80px rgba(0,0,0,.5);z-index:1;"><div style="position:relative;width:120px;height:120px;margin:0 auto 26px;"><div style="position:absolute;inset:-5px;border-radius:50%;background:conic-gradient(${t.a},${t.a2},${t.a});animation:sp 5s linear infinite;filter:blur(1px);"></div><div style="position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(${t.a2},${t.a},${t.a2});animation:sp 8s linear infinite reverse;opacity:.5;"></div><div style="position:relative;z-index:2;width:100%;height:100%;border-radius:50%;overflow:hidden;border:3px solid ${t.bg};background:${t.mid};display:flex;align-items:center;justify-content:center;">${ph}</div></div><p style="font-size:10px;letter-spacing:5px;text-transform:uppercase;color:${t.a};">\u2726 Special Day \u2726</p><h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(32px,9vw,46px);font-weight:700;color:white;margin:6px 0 2px;line-height:1.05;text-shadow:0 0 40px ${t.a}44;">${esc(nm)}</h1><p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:${t.a2};margin-bottom:18px;">${esc(wh)}</p><div style="display:flex;align-items:center;gap:10px;margin:14px 0;"><span style="flex:1;height:1px;background:${t.a}30;"></span><em>\u{1F380}</em><span style="flex:1;height:1px;background:${t.a}30;"></span></div><span style="font-size:52px;display:block;margin:0 auto 8px;animation:bc 1.4s ease-in-out infinite alternate;">\u{1F382}</span><p style="font-size:14px;color:rgba(255,255,255,.5);line-height:1.8;">${esc(rm)} \u{1F4AB}</p></div><div style="position:fixed;bottom:12px;width:100%;text-align:center;font-size:11px;color:rgba(255,255,255,0.3);font-family:'Poppins',sans-serif;">WishCard.in</div><script>var colors=${JSON.stringify(t.pc)};var pCont=document.getElementById('particles');for(var i=0;i<18;i++){var p=document.createElement('div');p.className='particle';var sz=Math.random()*6+3;p.style.cssText='left:'+Math.random()*100+'%;width:'+sz+'px;height:'+sz+'px;background:'+colors[i%colors.length]+';--d:'+(Math.random()*8+6).toFixed(1)+'s;--del:'+(Math.random()*10).toFixed(1)+'s;';pCont.appendChild(p);}<\/script></body></html>`;
+
   // Hide form and preview columns
   document.querySelector('.fc').style.display='none';
   var pcEl=document.querySelector('.pc');if(pcEl)pcEl.style.display='none';
@@ -304,29 +310,20 @@ function dlCard(){
   }
   co.style.display='flex';
 
-  const ph=crop?`<img src="${crop}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">`:`<span style="font-size:42px;line-height:120px;display:block;text-align:center;">\u{1F338}</span>`;
-
   co.innerHTML=`
-    <div id="cardDisplay" style="width:min(380px,90vw);background:${t.g};border-radius:32px;padding:44px 32px 40px;text-align:center;position:relative;border:1px solid ${t.a}40;box-shadow:0 0 80px ${t.a}22,0 24px 80px rgba(0,0,0,.5);animation:ci 1s cubic-bezier(.22,1,.36,1) both;">
-      <style>@keyframes ci{from{opacity:0;transform:translateY(70px) scale(.85);}to{opacity:1;transform:none;}}@keyframes sp{to{transform:rotate(360deg);}}@keyframes bc{from{transform:translateY(0) rotate(-3deg);}to{transform:translateY(-10px) rotate(3deg);}}</style>
-      <div style="position:relative;width:120px;height:120px;margin:0 auto 26px;">
-        <div style="position:absolute;inset:-5px;border-radius:50%;background:conic-gradient(${t.a},${t.a2},${t.a});animation:sp 5s linear infinite;filter:blur(1px);"></div>
-        <div style="position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(${t.a2},${t.a},${t.a2});animation:sp 8s linear infinite reverse;opacity:.5;"></div>
-        <div style="position:relative;z-index:2;width:100%;height:100%;border-radius:50%;overflow:hidden;border:3px solid ${t.bg};background:${t.mid};display:flex;align-items:center;justify-content:center;">${ph}</div>
-      </div>
-      <p style="font-size:10px;letter-spacing:5px;text-transform:uppercase;color:${t.a};">\u2726 Special Day \u2726</p>
-      <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(32px,9vw,46px);font-weight:700;color:white;margin:6px 0 2px;line-height:1.05;text-shadow:0 0 40px ${t.a}44;">${esc(nm)}</h1>
-      <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:${t.a2};margin-bottom:18px;">${esc(wh)}</p>
-      <div style="display:flex;align-items:center;gap:10px;margin:14px 0;"><span style="flex:1;height:1px;background:${t.a}30;"></span><em>\u{1F380}</em><span style="flex:1;height:1px;background:${t.a}30;"></span></div>
-      <span style="font-size:52px;display:block;margin:0 auto 8px;animation:bc 1.4s ease-in-out infinite alternate;">\u{1F382}</span>
-      <p style="font-size:14px;color:rgba(255,255,255,.5);line-height:1.8;">${esc(rm)} \u{1F4AB}</p>
+    <div style="width:min(380px,90vw);aspect-ratio:9/16;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.1);">
+      <iframe id="previewFrame" style="width:100%;height:100%;border:none;" sandbox="allow-scripts"></iframe>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px;width:min(380px,90vw);margin-top:14px;">
-      <button id="hdBtn" onclick="doHDSave()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.07);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:14px 24px;color:white;font-family:'Poppins',sans-serif;font-size:14px;font-weight:500;cursor:pointer;width:100%;transition:all .2s;">\u{1F4F8} HD Photo Save Karo</button>
-      <button id="vidBtn" onclick="doVideoDownload()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.07);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:14px 24px;color:white;font-family:'Poppins',sans-serif;font-size:14px;font-weight:500;cursor:pointer;width:100%;transition:all .2s;">\u{1F3AC} Video Download Karo</button>
-      <a href="#" onclick="backToEdit();return false;" style="text-align:center;color:rgba(255,255,255,.5);font-size:12px;margin-top:4px;text-decoration:none;">\u2190 Back to Edit</a>
+    <div style="display:flex;flex-direction:column;gap:10px;width:min(380px,90vw);margin-top:16px;">
+      <button onclick="doHDSave()" id="hdBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.07);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:14px 24px;color:white;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;width:100%;transition:all .2s;">\u{1F4F8} HD Photo Save Karo</button>
+      <button onclick="doShareLink()" id="shareBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#25D366,#128C7E);border:none;border-radius:16px;padding:14px 24px;color:white;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;width:100%;transition:all .2s;">\u{1F517} Share Link</button>
+      <a href="#" onclick="backToEdit();return false;" style="text-align:center;color:rgba(255,255,255,0.5);font-size:12px;margin-top:6px;text-decoration:none;">\u2190 Back to Edit</a>
     </div>
   `;
+
+  document.getElementById('previewFrame').srcdoc=html;
+  window._generatedHTML=html;
+  window._cardMeta={recipientName:nm, cardType:'birthday', thumbnailDataUrl:crop};
   upS(4);
 }
 
@@ -351,102 +348,53 @@ function doHDSave(){
   var ctx=cv.getContext('2d');
 
   var renderCard=function(){
-    // Gradient background
     var bgGrad=ctx.createLinearGradient(0,0,W,H);
     bgGrad.addColorStop(0,t.bg);bgGrad.addColorStop(0.5,t.mid);bgGrad.addColorStop(1,t.bg2);
     ctx.fillStyle=bgGrad;ctx.fillRect(0,0,W,H);
-
-    // Glow ring
     var photoSize=W*0.38;
     var px=(W-photoSize)/2,py=H*0.12;
     ctx.beginPath();ctx.arc(px+photoSize/2,py+photoSize/2,photoSize/2+8,0,Math.PI*2);
     ctx.strokeStyle=t.a;ctx.lineWidth=6;ctx.shadowColor=t.a;ctx.shadowBlur=30;ctx.stroke();ctx.shadowBlur=0;
-
-    // Photo circle
-    if(crop){
-      var img=document.createElement('img');
-      img.src=crop;
-      ctx.save();ctx.beginPath();ctx.arc(px+photoSize/2,py+photoSize/2,photoSize/2,0,Math.PI*2);ctx.clip();
-      ctx.drawImage(img,px,py,photoSize,photoSize);ctx.restore();
-    }
-
-    // Tag
+    if(crop){var img=document.createElement('img');img.src=crop;ctx.save();ctx.beginPath();ctx.arc(px+photoSize/2,py+photoSize/2,photoSize/2,0,Math.PI*2);ctx.clip();ctx.drawImage(img,px,py,photoSize,photoSize);ctx.restore();}
     ctx.textAlign='center';
     ctx.font="500 28px 'Poppins',sans-serif";ctx.fillStyle=t.a;
     ctx.fillText('\u2726 Special Day \u2726',W/2,py+photoSize+80);
-
-    // Name
     ctx.save();ctx.font="700 100px 'Cormorant Garamond',serif";ctx.fillStyle='#ffffff';
     ctx.shadowColor=t.a;ctx.shadowBlur=30;
     ctx.fillText(nm,W/2,py+photoSize+200);ctx.restore();
-
-    // Wish
     ctx.font="italic 50px 'Cormorant Garamond',serif";ctx.fillStyle=t.a2;
     ctx.fillText(wh,W/2,py+photoSize+280);
-
-    // Cake emoji
     ctx.font="100px serif";ctx.fillText('\u{1F382}',W/2,py+photoSize+420);
-
-    // Message
     ctx.font="400 36px 'Poppins',sans-serif";ctx.fillStyle='rgba(255,255,255,0.55)';
     var words=rm.split(' '),line='',lineY=py+photoSize+520;
-    for(var n=0;n<words.length;n++){
-      var testLine=line+words[n]+' ';
-      if(ctx.measureText(testLine).width>W*0.75&&n>0){ctx.fillText(line,W/2,lineY);line=words[n]+' ';lineY+=50;}
-      else{line=testLine;}
-    }
+    for(var n=0;n<words.length;n++){var testLine=line+words[n]+' ';if(ctx.measureText(testLine).width>W*0.75&&n>0){ctx.fillText(line,W/2,lineY);line=words[n]+' ';lineY+=50;}else{line=testLine;}}
     ctx.fillText(line,W/2,lineY);
-
-    // Branding
     ctx.font="300 28px 'Poppins',sans-serif";ctx.fillStyle='rgba(255,255,255,0.3)';
     ctx.fillText('WishCard.in',W/2,H-60);
-
-    // Download
     var a=document.createElement('a');a.download='birthday_'+sn+'_HD.png';a.href=cv.toDataURL('image/png',1);a.click();
     btn.textContent='\u2705 Saved!';btn.disabled=false;
     setTimeout(function(){btn.textContent='\u{1F4F8} HD Photo Save Karo';},3000);
   };
 
-  if(crop){
-    var img=new Image();
-    var timeout=setTimeout(function(){renderCard();},5000);
-    img.onload=function(){clearTimeout(timeout);renderCard();};
-    img.onerror=function(){clearTimeout(timeout);renderCard();};
-    img.src=crop;
-  } else {
-    renderCard();
-  }
+  if(crop){var img=new Image();var timeout=setTimeout(function(){renderCard();},5000);img.onload=function(){clearTimeout(timeout);renderCard();};img.onerror=function(){clearTimeout(timeout);renderCard();};img.src=crop;}
+  else{renderCard();}
 }
 
-function doVideoDownload(){
-  var btn=document.getElementById('vidBtn');
-  if(!window._recordCardVideo){btn.textContent='\u274C Module not loaded';return;}
-  btn.textContent='\u23F3 Video ban rahi hai...';btn.disabled=true;
-  var t=TH[cT];
-  var nm=document.getElementById('ni').value.trim()||'Aapka Naam';
-  var wh=document.getElementById('wi').value.trim()||'Happy Birthday \u{1F33A}';
-  var rm=document.getElementById('mi').value.trim()||'Aaj ka din sirf aapka hai \u2728';
-  var sn=(nm||'card').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
-
-  window._recordCardVideo({
-    photoDataUrl:crop||null,
-    recipientName:nm,
-    wishText:wh,
-    message:rm,
-    colors:{primary:t.bg,secondary:t.mid,glow:t.a2,particles:t.pc},
-    duration:5000,
-    filename:'birthday_'+sn+'_video.webm',
-    layout:'circular'
-  }).then(function(res){
-    if(res.success){
-      btn.textContent='\u2705 Video Saved!';
-      setTimeout(function(){btn.textContent='\u{1F3AC} Video Download Karo';btn.disabled=false;},3000);
-    } else {
-      alert(res.error||'Video download failed');
-      btn.textContent='\u{1F3AC} Video Download Karo';btn.disabled=false;
-    }
-  }).catch(function(){
-    btn.textContent='\u{1F3AC} Video Download Karo';btn.disabled=false;
+function doShareLink(){
+  var btn=document.getElementById('shareBtn');
+  btn.textContent='\u23F3 Link ban rahi hai...';btn.disabled=true;
+  window._shareCard({
+    htmlContent:window._generatedHTML,
+    thumbnailDataUrl:window._cardMeta.thumbnailDataUrl,
+    cardType:window._cardMeta.cardType,
+    recipientName:window._cardMeta.recipientName
+  }).then(function(result){
+    if(result.success){window._showShareUI(result.cardId,window._cardMeta.recipientName,window._cardMeta.cardType);}
+    else{alert('Share failed: '+(result.error||'Unknown error'));}
+    btn.textContent='\u{1F517} Share Link';btn.disabled=false;
+  }).catch(function(e){
+    alert('Error: '+e.message);
+    btn.textContent='\u{1F517} Share Link';btn.disabled=false;
   });
 }
 
