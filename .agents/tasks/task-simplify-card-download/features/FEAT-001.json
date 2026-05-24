@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "refactor",
   "description": "Remove the sharing/preview modal flow from all 4 card generator pages and replace the dlCard() function to directly display the animated card on-page with only 2 buttons: HD Photo Save and Video Download. Also rewrite js/video-capture.js to capture the actual on-screen card element (not a separate canvas animation) for 5 seconds.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Step 1: Rewrite js/video-capture.js - Replace the current canvas-animation-based approach with a new function that: (a) Takes a DOM element reference (the card container), (b) Uses html2canvas to render the card to an offscreen canvas at each frame, OR uses the element's own rendering with a canvas overlay approach. Since the cards use CSS animations which html2canvas cannot capture, the best approach is: create a canvas, use canvas.captureStream(30) + MediaRecorder, and for each frame render the card element onto the canvas using a combination of drawing a static background + animated particles via JS. ACTUALLY - the simplest reliable approach: Use the existing card element on screen with a wrapper approach. The function should: (1) Check MediaRecorder support, (2) Wrap the card element's parent in a container, (3) Use the 'html2canvas' approach to capture a single high-res frame of the card as a base image, (4) Then use a canvas animation similar to current approach but with the actual card image as background + animated particles/sparkles overlay for 5 seconds, (5) Record that canvas via captureStream + MediaRecorder, (6) Download as WebM. Export a simple function: recordCardVideo(cardElement, options) that returns a Promise<Blob>. Duration should be 5000ms. Remove the old generateThumbnail export since it was only used by card-share.js.",
     "Step 2: Remove the <script type='module'> import block from birthday.html that imports card-share.js and firebase-config.js. Remove the window._showCardPreview, window._shareCard, window._showShareUI assignments.",
@@ -34,5 +34,5 @@
     "Verify firebase.json, .firebaserc, functions/index.js still exist unchanged"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 4 HTML files updated successfully. video-capture.js rewritten with single recordCardVideo export. HD save uses Canvas 2D manual drawing. The congrats.html file needed special handling due to its larger generated HTML template that was cut. No build or test runner in this project - validation was structural (JS syntax check, grep for removed references)."
 }
