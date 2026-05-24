@@ -264,9 +264,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 </div>
 
 <script type="module">
-import { showCardPreview, shareCard, showShareUI } from './js/card-share.js';
+import { shareCard, showShareUI } from './js/card-share.js';
 import './js/firebase-config.js';
-window._showCardPreview = showCardPreview;
 window._shareCard = shareCard;
 window._showShareUI = showShareUI;
 </script>
@@ -442,216 +441,111 @@ function dlCard() {
   const pc = JSON.stringify(m.pc);
   const sn = nm.replace(/\s+/g,'_');
   const ph = crop;
-  const plateState = showGlassPlate ? 'true' : 'false';
+  const plateClass = showGlassPlate ? 'with-plate' : 'no-plate';
 
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Happy Birthday ${nm}</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-body{display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;background:#05020a;min-height:100vh;padding:20px;overflow-x:hidden;}
+  const html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1"><title>Happy Birthday '+nm+'</title><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"><style>*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}body{display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"Outfit",sans-serif;background:#05020a;min-height:100vh;padding:20px;overflow-x:hidden;}.card-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:400px;animation:wIn 1s ease .3s both;}@keyframes wIn{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:none;}}.card{width:min(340px,88vw);aspect-ratio:9/16;border-radius:26px;overflow:hidden;position:relative;box-shadow:0 24px 80px rgba(0,0,0,0.85),0 0 0 1px rgba(255,255,255,0.06);}.l-photo{position:absolute;inset:0;background:'+m.swL+';}.l-photo img{width:100%;height:100%;object-fit:cover;animation:kb 16s ease-in-out infinite alternate;}@keyframes kb{from{transform:scale(1);}to{transform:scale(1.08);}}.l-vign{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,0.6) 100%);}.l-mood{position:absolute;inset:0;background:'+m.ov+';}.l-fade{position:absolute;inset:0;background:linear-gradient(to top,'+m.fade+' 0%,rgba(0,0,0,0.4) 35%,transparent 70%);}.l-parts{position:absolute;inset:0;overflow:hidden;pointer-events:none;}.pt{position:absolute;opacity:0;animation:ptf var(--fd) linear var(--fd2) infinite;}@keyframes ptf{0%{transform:translateY(-10px) rotate(0);opacity:0;}8%{opacity:.8;}100%{transform:translateY(101%) rotate(540deg);opacity:0;}}.l-text{position:absolute;bottom:0;left:0;right:0;padding:0 18px 22px;text-align:center;z-index:10;}.glass{border-radius:16px;padding:14px 16px;transition:all 0.3s;}.glass.with-plate{background:rgba(0,0,0,0.38);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.09);}.glass.no-plate{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;border:none;}.tag{font-size:8px;letter-spacing:5px;text-transform:uppercase;color:rgba(255,255,255,0.4);display:block;margin-bottom:5px;}.name{font-family:"Cormorant Garamond",serif;font-size:40px;font-weight:700;color:white;line-height:1.1;display:block;text-shadow:0 0 30px '+m.glow+'aa;}.wish{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:16px;color:'+m.glow+';display:block;margin-top:4px;}.divider{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0;}.divider span{width:30px;height:1px;background:rgba(255,255,255,0.15);}.msg{font-size:12px;color:rgba(255,255,255,0.55);line-height:1.5;display:block;}.bdg{font-size:9px;color:rgba(255,255,255,0.14);letter-spacing:2px;text-transform:uppercase;margin-top:8px;}</style></head><body><div class="card-wrap"><div class="card" id="card"><div class="l-photo">'+(ph?'<img src="'+ph+'" id="cardImg">':'')+'</div><div class="l-vign"></div><div class="l-mood"></div><div class="l-fade"></div><div class="l-parts" id="pts"></div><div class="l-text"><div class="glass '+plateClass+'"><span class="tag">✦ &nbsp; SPECIAL DAY &nbsp; ✦</span><span class="name">'+nm+'</span><span class="wish">'+wh+'</span><div class="divider"><span></span>// 🎀 //<span></span></div><span class="msg">'+ms+'</span></div></div></div><p class="bdg">✦ WishCard.in</p></div><script>(function(){var pc='+pc+';var pts=document.getElementById("pts");for(var j=0;j<pc.length*4;j++){var el=document.createElement("div");el.className="pt";var w=Math.random()*5+3;el.style.cssText="left:"+Math.random()*100+"%;width:"+w+"px;height:"+w+"px;border-radius:"+(Math.random()>.5?"0 50% 0 50%":"50%")+";background:"+pc[j%pc.length]+";--fd:"+(Math.random()*8+6).toFixed(1)+"s;--fd2:"+(Math.random()*10).toFixed(1)+"s";pts.appendChild(el);}})();<\/script></body></html>';
 
-.intro{position:fixed;inset:0;background:#05020a;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;animation:iOut 0.8s ease 1.8s forwards;}
-@keyframes iOut{to{opacity:0;pointer-events:none;}}
-.intro-name{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:700;color:white;text-shadow:0 0 30px ${m.glow}77;}
+  window._generatedHTML = html;
+  // Hide form and preview columns
+  document.querySelector('.form-col').style.display='none';
+  var pcol=document.querySelector('.preview-col');if(pcol)pcol.style.display='none';
+  // Create cardOutput
+  var co=document.getElementById('cardOutput');
+  if(!co){co=document.createElement('div');co.id='cardOutput';co.style.cssText='display:flex;flex-direction:column;align-items:center;padding:24px 16px 60px;min-height:100vh;justify-content:center;';document.querySelector('.page').appendChild(co);}
+  co.style.display='flex';
+  co.innerHTML='<div style="border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.06);aspect-ratio:9/16;width:min(380px,90vw);"><iframe sandbox="allow-scripts" srcdoc="'+html.replace(/"/g,'&quot;')+'" style="width:100%;height:100%;border:none;"></iframe></div><div style="display:flex;flex-direction:column;gap:10px;width:min(380px,90vw);margin-top:16px;"><button id="hdBtn" onclick="doHDSave()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.07);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:14px 24px;color:white;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:500;cursor:pointer;width:100%;transition:all .2s;">📸 HD Photo Save Karo</button><button id="shareBtn" onclick="doShareLink()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#25D366,#128C7E);border:none;border-radius:16px;padding:14px 24px;color:white;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;width:100%;transition:all .2s;box-shadow:0 4px 15px rgba(37,211,102,0.3);">🔗 Share Link</button><a href="#" onclick="backToEdit();return false;" style="text-align:center;color:rgba(255,255,255,.5);font-size:12px;margin-top:4px;text-decoration:none;">← Back to Edit</a></div>';
+}
 
-.card-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:400px;animation:wIn 1s ease 2.2s both;}
-@keyframes wIn{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:none;}}
-
-.card{width:min(340px,88vw);aspect-ratio:9/16;border-radius:26px;overflow:hidden;position:relative;box-shadow:0 24px 80px rgba(0,0,0,0.85),0 0 0 1px rgba(255,255,255,0.06);}
-.l-photo{position:absolute;inset:0;background:${m.swL};}
-.l-photo img{width:100%;height:100%;object-fit:cover;animation:kb 16s ease-in-out infinite alternate;}
-@keyframes kb{from{transform:scale(1);}to{transform:scale(1.08);}}
-
-.l-vign{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,0.6) 100%);}
-.l-mood{position:absolute;inset:0;background:${m.ov};}
-.l-fade{position:absolute;inset:0;background:linear-gradient(to top,${m.fade} 0%,rgba(0,0,0,0.4) 35%,transparent 70%);}
-
-.l-parts{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
-.pt{position:absolute;opacity:0;animation:ptf var(--fd) linear var(--fd2) infinite;}
-@keyframes ptf{0%{transform:translateY(-10px) rotate(0);opacity:0;}8%{opacity:.8;}100%{transform:translateY(101%) rotate(540deg);opacity:0;}}
-
-.l-text{position:absolute;bottom:0;left:0;right:0;padding:0 18px 22px;text-align:center;z-index:10;}
-.glass{border-radius:16px;padding:14px 16px;transition:all 0.3s;}
-.glass.with-plate {background:rgba(0,0,0,0.38);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.09);}
-.glass.no-plate {background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;border:none;}
-
-.tag{font-size:8px;letter-spacing:5px;text-transform:uppercase;color:rgba(255,255,255,0.4);display:block;margin-bottom:5px;}
-.name{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:700;color:white;line-height:1.1;display:block;text-shadow:0 0 30px ${m.glow}aa;}
-.wish{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:${m.glow};display:block;margin-top:4px;}
-.divider{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0;}
-.divider span{width:30px;height:1px;background:rgba(255,255,255,0.15);}
-.msg{font-size:12px;color:rgba(255,255,255,0.55);line-height:1.5;display:block;}
-
-.btns{display:flex;width:min(340px,88vw);margin-top:5px;}
-.btn-hd{flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
-.btn-hd:hover{background:rgba(255,255,255,0.15);transform:translateY(-2px);}
-</style>
-</head>
-<body>
-
-<div class="intro">
-  <div class="intro-name">${nm}</div>
-</div>
-
-<div class="card-wrap">
-  <div class="card" id="card">
-    <div class="l-photo">${ph ? `<img src="${ph}" id="cardImg">` : ''}</div>
-    <div class="l-vign"></div>
-    <div class="l-mood"></div>
-    <div class="l-fade"></div>
-    <div class="l-parts" id="pts"></div>
-    <div class="l-text">
-      <div class="glass ${showGlassPlate ? 'with-plate' : 'no-plate'}">
-        <span class="tag">✦ &nbsp; SPECIAL DAY &nbsp; ✦</span>
-        <span class="name">${nm}</span>
-        <span class="wish">${wh}</span>
-        <div class="divider"><span></span>// 🎀 //<span></span></div>
-        <span class="msg">${ms}</span>
-      </div>
-    </div>
-  </div>
-  
-  <div class="btns">
-    <button class="btn-hd" id="sb" onclick="sHD()">📸 Full HD Card Save Karo</button>
-  </div>
-</div>
-
-<script>
-(function(){
-  var pc=${pc}; var pts=document.getElementById('pts');
-  for(var j=0;j<pc.length*4;j++){
-    var el=document.createElement('div'); el.className='pt'; var w=Math.random()*5+3;
-    el.style.cssText='left:'+Math.random()*100+'%;width:'+w+'px;height:'+w+'px;background:'+pc[j%pc.length]+';--fd:'+(Math.random()*9+6).toFixed(1)+'s;--fd2:'+(Math.random()*10).toFixed(1)+'s;';
-    pts.appendChild(el);
+function doHDSave(){
+  var btn=document.getElementById('hdBtn');
+  btn.textContent='⏳ HD Photo ban rahi hai...';btn.disabled=true;
+  var m=MOODS[cM];
+  var nm=esc(document.getElementById('ni').value.trim()||'Aapka Naam');
+  var wh=esc(document.getElementById('wi').value.trim()||'Happy Birthday 🌺');
+  var rmg=document.getElementById('mi').value.trim()||'';
+  var sn=nm.replace(/\s+/g,'_');
+  var cv=document.createElement('canvas');
+  var W=1080,H=1920;cv.width=W;cv.height=H;
+  var ctx=cv.getContext('2d');
+  var renderLayout=function(){
+    var vign=ctx.createRadialGradient(W/2,H/2,W*0.2,W/2,H/2,H*0.7);
+    vign.addColorStop(0,'transparent');vign.addColorStop(1,'rgba(0,0,0,0.65)');
+    ctx.fillStyle=vign;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=m.ov;ctx.fillRect(0,0,W,H);
+    var fade=ctx.createLinearGradient(0,H*0.35,0,H);
+    fade.addColorStop(0,'transparent');fade.addColorStop(1,m.fade);
+    ctx.fillStyle=fade;ctx.fillRect(0,0,W,H);
+    var pX=70,pY=H-660,pW=W-140,pH=540,pR=32;
+    if(showGlassPlate){
+      ctx.save();ctx.beginPath();
+      ctx.moveTo(pX+pR,pY);ctx.lineTo(pX+pW-pR,pY);ctx.quadraticCurveTo(pX+pW,pY,pX+pW,pY+pR);
+      ctx.lineTo(pX+pW,pY+pH-pR);ctx.quadraticCurveTo(pX+pW,pY+pH,pX+pW-pR,pY+pH);
+      ctx.lineTo(pX+pR,pY+pH);ctx.quadraticCurveTo(pX,pY+pH,pX,pY+pH-pR);
+      ctx.lineTo(pX,pY+pR);ctx.quadraticCurveTo(pX,pY,pX+pR,pY);
+      ctx.closePath();
+      ctx.fillStyle='rgba(0,0,0,0.45)';ctx.strokeStyle='rgba(255,255,255,0.12)';
+      ctx.lineWidth=3;ctx.fill();ctx.stroke();ctx.restore();
+    }
+    ctx.textAlign='center';
+    ctx.font='600 26px "Outfit",sans-serif';ctx.fillStyle='rgba(255,255,255,0.4)';
+    ctx.fillText('\u2726   SPECIAL DAY   \u2726',W/2,pY+80);
+    ctx.save();ctx.font='700 95px "Cormorant Garamond",serif';ctx.fillStyle='#ffffff';
+    ctx.shadowColor=m.glow;ctx.shadowBlur=30;
+    ctx.fillText(nm,W/2,pY+200);ctx.restore();
+    ctx.font='italic 600 46px "Cormorant Garamond",serif';ctx.fillStyle=m.glow;
+    ctx.fillText(wh,W/2,pY+280);
+    ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(pX+80,pY+330);ctx.lineTo(W/2-50,pY+330);
+    ctx.moveTo(W/2+50,pY+330);ctx.lineTo(pX+pW-80,pY+330);ctx.stroke();
+    ctx.font='400 34px "Outfit",sans-serif';ctx.fillStyle='rgba(255,255,255,0.55)';
+    var words=rmg.split(' '),line='',lineY=pY+415;
+    for(var n=0;n<words.length;n++){var testLine=line+words[n]+' ';if(ctx.measureText(testLine).width>pW-120&&n>0){ctx.fillText(line,W/2,lineY);line=words[n]+' ';lineY+=52;}else{line=testLine;}}
+    ctx.fillText(line,W/2,lineY);
+    var link=document.createElement('a');
+    link.download='Cinematic_Card_'+sn+'.png';
+    link.href=cv.toDataURL('image/png',1.0);
+    link.click();
+    btn.textContent='📸 HD Photo Save Karo';btn.disabled=false;
+  };
+  if(crop){
+    var bg=new Image();
+    bg.onload=function(){ctx.drawImage(bg,0,0,W,H);renderLayout();};
+    bg.onerror=function(){ctx.fillStyle=m.swL;ctx.fillRect(0,0,W,H);renderLayout();};
+    bg.src=crop;
+  } else {
+    ctx.fillStyle=m.swL;ctx.fillRect(0,0,W,H);renderLayout();
   }
-})();
+}
 
-function sHD(){
-  var btn = document.getElementById('sb');
-  btn.textContent = '⏳ Saving Card...'; btn.disabled = true;
-
-  requestAnimationFrame(function() {
-    setTimeout(function() {
-      try {
-        var cv = document.createElement('canvas');
-        var W = 1080; var H = 1920;
-        cv.width = W; cv.height = H;
-        var ctx = cv.getContext('2d');
-
-        var renderLayout = function() {
-          // Vignette layer
-          var vign = ctx.createRadialGradient(W/2, H/2, W*0.2, W/2, H/2, H*0.7);
-          vign.addColorStop(0, 'transparent'); vign.addColorStop(1, 'rgba(0,0,0,0.65)');
-          ctx.fillStyle = vign; ctx.fillRect(0,0,W,H);
-
-          // Color overlay mood
-          ctx.fillStyle = "${m.ov}"; ctx.fillRect(0,0,W,H);
-
-          // Black bottom lighting gradient
-          var fade = ctx.createLinearGradient(0, H*0.35, 0, H);
-          fade.addColorStop(0, 'transparent'); fade.addColorStop(1, "${m.fade}");
-          ctx.fillStyle = fade; ctx.fillRect(0,0,W,H);
-
-          var pX=70, pY=H-660, pW=W-140, pH=540, pR=32;
-
-          // CONDITIONAL RENDER: Glass Plate draw checks
-          if (${plateState}) {
-            ctx.save(); ctx.beginPath();
-            ctx.moveTo(pX+pR, pY); ctx.lineTo(pX+pW-pR, pY); ctx.quadraticCurveTo(pX+pW, pY, pX+pW, pY+pR);
-            ctx.lineTo(pX+pW, pY+pH-pR); ctx.quadraticCurveTo(pX+pW, pY+pH, pX+pW-pR, pY+pH);
-            ctx.lineTo(pX+pR, pY+pH); ctx.quadraticCurveTo(pX, pY+pH, pX, pY+pH-pR);
-            ctx.lineTo(pX, pY+pR); ctx.quadraticCurveTo(pX, pY, pX+pR, pY);
-            ctx.closePath();
-            ctx.fillStyle = "rgba(0, 0, 0, 0.45)"; ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
-            ctx.lineWidth = 3; ctx.fill(); ctx.stroke(); ctx.restore();
-          }
-
-          // Text layout script
-          ctx.textAlign = "center";
-          ctx.font = "600 26px 'Outfit', sans-serif"; ctx.fillStyle = "rgba(255,255,255,0.4)";
-          ctx.fillText("✦   SPECIAL DAY   ✦", W/2, pY+80);
-
-          ctx.save(); ctx.font = "700 95px 'Cormorant Garamond', serif"; ctx.fillStyle = "#ffffff";
-          ctx.shadowColor = "${m.glow}"; ctx.shadowBlur = 30;
-          ctx.fillText("${nm}", W/2, pY+200); ctx.restore();
-
-          ctx.font = "italic 600 46px 'Cormorant Garamond', serif"; ctx.fillStyle = "${m.glow}";
-          ctx.fillText("${wh}", W/2, pY+280);
-
-          ctx.strokeStyle = "rgba(255,255,255,0.15)"; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(pX+80, pY+330); ctx.lineTo(W/2-50, pY+330);
-          ctx.moveTo(W/2+50, pY+330); ctx.lineTo(pX+pW-80, pY+330); ctx.stroke();
-          ctx.font = "32px 'Outfit', sans-serif"; ctx.fillText("🎀", W/2, pY+342);
-
-          ctx.font = "400 34px 'Outfit', sans-serif"; ctx.fillStyle = "rgba(255,255,255,0.55)";
-          var words = "${rmg}".split(' '), line = '', lineY = pY+415;
-          for(var n=0; n<words.length; n++) {
-            var testLine = line + words[n] + ' ';
-            if (ctx.measureText(testLine).width > pW-120 && n>0) {
-              ctx.fillText(line, W/2, lineY); line = words[n] + ' '; lineY += 52;
-            } else { line = testLine; }
-          }
-          ctx.fillText(line, W/2, lineY);
-
-          // Force download trigger links
-          var link = document.createElement('a');
-          link.download = 'Cinematic_Card_${sn}.png';
-          link.href = cv.toDataURL('image/png', 1.0);
-          link.click();
-
-          btn.textContent = '📸 Full HD Card Save Karo'; btn.disabled = false;
-        };
-
-        var imgEl = document.getElementById('cardImg');
-        if(imgEl && imgEl.src) {
-          var bg = new Image();
-          bg.onload = function() { ctx.drawImage(bg, 0, 0, W, H); renderLayout(); };
-          bg.onerror = function() { ctx.fillStyle="${m.swL}"; ctx.fillRect(0,0,W,H); renderLayout(); };
-          bg.src = imgEl.src;
-        } else {
-          ctx.fillStyle = "${m.swL}"; ctx.fillRect(0,0,W,H); renderLayout();
-        }
-      } catch(err) {
-        console.error(err);
-        btn.textContent = '📸 Full HD Card Save Karo'; btn.disabled = false;
-      }
-    }, 60);
+function doShareLink(){
+  var btn=document.getElementById('shareBtn');
+  if(!window._shareCard){btn.textContent='Error: module not loaded';return;}
+  btn.textContent='\u23F3 Share link ban raha hai...';btn.disabled=true;
+  var nm=document.getElementById('ni').value.trim()||'Friend';
+  window._shareCard({
+    htmlContent: window._generatedHTML,
+    thumbnailDataUrl: crop||null,
+    cardType: 'birthday',
+    recipientName: nm
+  }).then(function(result){
+    if(result.success){
+      btn.textContent='\u2705 Link Ready!';
+      btn.disabled=false;
+      window._showShareUI(result.cardId, nm, 'birthday');
+    } else {
+      alert(result.error||'Share failed. Try again.');
+      btn.textContent='\uD83D\uDD17 Share Link';btn.disabled=false;
+    }
+  }).catch(function(e){
+    alert('Share failed: '+(e.message||'Unknown error'));
+    btn.textContent='\uD83D\uDD17 Share Link';btn.disabled=false;
   });
 }
-<\/script>
-</body>
-</html>`;
 
-  // Show preview with share options
-  if (window._showCardPreview) {
-    var downloadFn = function() {
-      var bl = new Blob([html], {type: 'text/html'});
-      var lnk = document.createElement('a');
-      lnk.download = 'birthday_' + sn + '_card.html';
-      lnk.href = URL.createObjectURL(bl);
-      lnk.click();
-    };
-    window._showCardPreview(html, {
-      recipientName: document.getElementById('ni').value.trim() || 'Friend',
-      cardType: 'birthday-cinematic',
-      occasion: 'Birthday',
-      thumbnailDataUrl: crop || null,
-      colors: { primary: m.swL, secondary: m.swR, accent: m.glow, glow: m.glow, particles: m.glow },
-      downloadFn: downloadFn
-    });
-  } else {
-    // Fallback: direct download if module not loaded
-    var blob = new Blob([html], {type: 'text/html'});
-    var link = document.createElement('a');
-    link.download = 'birthday_' + sn + '_card.html';
-    link.href = URL.createObjectURL(blob);
-    link.click();
-  }
+function backToEdit(){
+  document.querySelector('.form-col').style.display='';
+  var pcol=document.querySelector('.preview-col');if(pcol)pcol.style.display='';
+  var co=document.getElementById('cardOutput');if(co)co.style.display='none';
 }
 </script>
 </body>
