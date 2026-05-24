@@ -453,12 +453,13 @@ function dlCard() {
   var co=document.getElementById('cardOutput');
   if(!co){co=document.createElement('div');co.id='cardOutput';co.style.cssText='display:flex;flex-direction:column;align-items:center;padding:24px 16px 60px;min-height:100vh;justify-content:center;';document.querySelector('.page').appendChild(co);}
   co.style.display='flex';
-  co.innerHTML='<div style="border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.06);aspect-ratio:9/16;width:min(380px,90vw);"><iframe sandbox="allow-scripts" srcdoc="'+html.replace(/"/g,'&quot;')+'" style="width:100%;height:100%;border:none;"></iframe></div><div style="display:flex;flex-direction:column;gap:10px;width:min(380px,90vw);margin-top:16px;"><button id="hdBtn" onclick="doHDSave()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.07);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:14px 24px;color:white;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:500;cursor:pointer;width:100%;transition:all .2s;">📸 HD Photo Save Karo</button><button id="shareBtn" onclick="doShareLink()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#25D366,#128C7E);border:none;border-radius:16px;padding:14px 24px;color:white;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;width:100%;transition:all .2s;box-shadow:0 4px 15px rgba(37,211,102,0.3);">🔗 Share Link</button><a href="#" onclick="backToEdit();return false;" style="text-align:center;color:rgba(255,255,255,.5);font-size:12px;margin-top:4px;text-decoration:none;">← Back to Edit</a></div>';
+  co.innerHTML='<div style="border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.06);aspect-ratio:9/16;width:min(380px,90vw);"><iframe sandbox="allow-scripts allow-same-origin" srcdoc="'+html.replace(/"/g,'&quot;')+'" style="width:100%;height:100%;border:none;"></iframe></div><div style="display:flex;flex-direction:column;gap:10px;width:min(380px,90vw);margin-top:16px;"><button id="hdBtn" onclick="doHDSave()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.07);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:14px 24px;color:white;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:500;cursor:pointer;width:100%;transition:all .2s;">📸 HD Photo Save Karo</button><button id="shareBtn" onclick="doShareLink()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#25D366,#128C7E);border:none;border-radius:16px;padding:14px 24px;color:white;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;width:100%;transition:all .2s;box-shadow:0 4px 15px rgba(37,211,102,0.3);">🔗 Share Link</button><a href="#" onclick="backToEdit();return false;" style="text-align:center;color:rgba(255,255,255,.5);font-size:12px;margin-top:4px;text-decoration:none;">← Back to Edit</a></div>';
 }
 
 function doHDSave(){
   var btn=document.getElementById('hdBtn');
-  btn.textContent='⏳ HD Photo ban rahi hai...';btn.disabled=true;
+  btn.textContent='\u23F3 HD Photo ban rahi hai...';btn.disabled=true;
+  try{
   var m=MOODS[cM];
   var nm=esc(document.getElementById('ni').value.trim()||'Aapka Naam');
   var wh=esc(document.getElementById('wi').value.trim()||'Happy Birthday 🌺');
@@ -468,6 +469,7 @@ function doHDSave(){
   var W=1080,H=1920;cv.width=W;cv.height=H;
   var ctx=cv.getContext('2d');
   var renderLayout=function(){
+    try{
     var vign=ctx.createRadialGradient(W/2,H/2,W*0.2,W/2,H/2,H*0.7);
     vign.addColorStop(0,'transparent');vign.addColorStop(1,'rgba(0,0,0,0.65)');
     ctx.fillStyle=vign;ctx.fillRect(0,0,W,H);
@@ -505,7 +507,8 @@ function doHDSave(){
     link.download='Cinematic_Card_'+sn+'.png';
     link.href=cv.toDataURL('image/png',1.0);
     link.click();
-    btn.textContent='📸 HD Photo Save Karo';btn.disabled=false;
+    btn.textContent='\uD83D\uDCF8 HD Photo Save Karo';btn.disabled=false;
+    }catch(e){btn.textContent='\uD83D\uDCF8 HD Photo Save Karo';btn.disabled=false;alert('Photo save failed. Please try again.');}
   };
   if(crop){
     var bg=new Image();
@@ -515,6 +518,7 @@ function doHDSave(){
   } else {
     ctx.fillStyle=m.swL;ctx.fillRect(0,0,W,H);renderLayout();
   }
+  }catch(e){btn.textContent='\uD83D\uDCF8 HD Photo Save Karo';btn.disabled=false;alert('Photo save failed. Please try again.');}
 }
 
 function doShareLink(){
