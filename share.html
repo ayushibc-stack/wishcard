@@ -173,7 +173,7 @@ html, body {
 
 <!-- Card Section -->
 <div class="card-section" id="cardSection">
-  <iframe id="cardIframe" sandbox="allow-scripts allow-same-origin" title="Your greeting card"></iframe>
+  <iframe id="cardIframe" title="Your greeting card"></iframe>
 </div>
 
 <!-- Error Section -->
@@ -214,10 +214,21 @@ function showError(title, message, btnText, btnAction) {
   }
 }
 
-function showCardImmediate(htmlUrl) {
-  loadingScreen.classList.add('hidden');
-  cardSection.classList.add('active');
-  cardIframe.src = htmlUrl;
+async function showCardImmediate(htmlUrl) {
+  try {
+    const response = await fetch(htmlUrl);
+    if (!response.ok) throw new Error('Failed to fetch card: ' + response.status);
+    const htmlContent = await response.text();
+    loadingScreen.classList.add('hidden');
+    cardSection.classList.add('active');
+    cardIframe.srcdoc = htmlContent;
+  } catch (err) {
+    // Fallback: try setting src directly (might work in some browsers)
+    console.warn('srcdoc fetch failed, falling back to src:', err);
+    loadingScreen.classList.add('hidden');
+    cardSection.classList.add('active');
+    cardIframe.src = htmlUrl;
+  }
 }
 
 async function loadCard() {
@@ -226,11 +237,16 @@ async function loadCard() {
     return;
   }
 
+  const timeout = setTimeout(() => {
+    showError('Loading mein time lag raha hai', 'Internet slow hai ya card load nahi ho raha. Please retry karo.', 'Retry', 'retry');
+  }, 15000);
+
   try {
     const cardRef = doc(db, 'cards', cardId);
     const cardSnap = await getDoc(cardRef);
 
     if (!cardSnap.exists()) {
+      clearTimeout(timeout);
       showError('Card nahi mili', 'Shayad link galat hai. Please check the link you received.', 'Go to WishCard.in', null);
       return;
     }
@@ -248,14 +264,17 @@ async function loadCard() {
     const { htmlUrl } = cardData;
 
     if (!htmlUrl) {
+      clearTimeout(timeout);
       showError('Oops!', 'Card content not available. Please try again later.', 'Go to WishCard.in', null);
       return;
     }
 
-    // Show card directly in iframe
-    showCardImmediate(htmlUrl);
+    // Show card directly in iframe using srcdoc
+    await showCardImmediate(htmlUrl);
+    clearTimeout(timeout);
 
   } catch (error) {
+    clearTimeout(timeout);
     console.error('Error loading card:', error);
     showError('Kuch gadbad hai', 'Please retry karo. Check your internet connection.', 'Retry', 'retry');
   }
