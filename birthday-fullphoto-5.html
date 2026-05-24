@@ -557,7 +557,7 @@ function doHDSave(){
       }
       ctx.fillText(line,W/2,lineY);
       var link=document.createElement('a');
-      link.download='Cinematic_Card_'+sn+'.png';
+      link.download='Birthday_Card_'+sn+'.png';
       link.href=cv.toDataURL('image/png',1.0);
       link.click();
       btn.textContent='\u2705 Saved!';
@@ -566,8 +566,15 @@ function doHDSave(){
 
     if(crop){
       var bg=new Image();
-      bg.onload=function(){ctx.drawImage(bg,0,0,W,H);renderLayout();};
-      bg.onerror=function(){ctx.fillStyle=m.swL;ctx.fillRect(0,0,W,H);renderLayout();};
+      var _imgDone=false;
+      var _imgTimeout=setTimeout(function(){
+        if(!_imgDone){_imgDone=true;ctx.fillStyle=m.swL;ctx.fillRect(0,0,W,H);renderLayout();}
+      },5000);
+      bg.onload=function(){
+        if(_imgDone)return;_imgDone=true;clearTimeout(_imgTimeout);
+        ctx.drawImage(bg,0,0,W,H);renderLayout();
+      };
+      bg.onerror=function(){if(!_imgDone){_imgDone=true;clearTimeout(_imgTimeout);ctx.fillStyle=m.swL;ctx.fillRect(0,0,W,H);renderLayout();}};
       bg.src=crop;
     } else {
       ctx.fillStyle=m.swL;ctx.fillRect(0,0,W,H);renderLayout();

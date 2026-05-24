@@ -415,8 +415,22 @@ function getSupportedMimeType() {
 function loadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
+    let done = false;
+    const timeout = setTimeout(() => {
+      if (!done) { done = true; resolve(null); }
+    }, 5000);
+    img.onload = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timeout);
+      resolve(img);
+    };
+    img.onerror = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timeout);
+      resolve(null);
+    };
     img.src = src;
   });
 }
