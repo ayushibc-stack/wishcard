@@ -81,66 +81,6 @@ html, body {
   color: rgba(168, 85, 247, 0.6);
 }
 
-/* Video Section */
-.video-section {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: #05020a;
-  z-index: 50;
-  transition: opacity 0.5s ease;
-}
-
-.video-section.active {
-  display: flex;
-}
-
-.video-section.fade-out {
-  opacity: 0;
-}
-
-.video-section video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.unmute-overlay {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
-  cursor: pointer;
-  transition: background 0.2s;
-  z-index: 60;
-}
-
-.unmute-overlay:hover {
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.unmute-overlay svg {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-}
-
-.unmute-overlay.hidden {
-  display: none;
-}
-
 /* Card Section */
 .card-section {
   position: fixed;
@@ -220,53 +160,6 @@ html, body {
 .error-btn:hover {
   background: rgba(168, 85, 247, 0.35);
 }
-
-/* Floating Buttons */
-.floating-buttons {
-  position: fixed;
-  bottom: 24px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  z-index: 70;
-  padding: 0 16px;
-}
-
-.float-btn {
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 24px;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: 'Outfit', sans-serif;
-  cursor: pointer;
-  display: none;
-  align-items: center;
-  gap: 6px;
-  transition: background 0.2s, transform 0.2s;
-  text-decoration: none;
-}
-
-.float-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  transform: translateY(-1px);
-}
-
-.float-btn.visible {
-  display: flex;
-}
-
-.float-btn svg {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-}
 </style>
 </head>
 <body>
@@ -276,15 +169,6 @@ html, body {
   <div class="spinner"></div>
   <div class="loading-text">Loading your special card...</div>
   <div class="loading-brand">WishCard.in</div>
-</div>
-
-<!-- Video Section -->
-<div class="video-section" id="videoSection">
-  <video id="videoPlayer" playsinline></video>
-  <div class="unmute-overlay" id="unmuteBtn">
-    <svg viewBox="0 0 24 24"><path d="M3.63 3.63a.996.996 0 0 0 0 1.41L7.29 8.7 7 9H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71v-4.17l4.18 4.18c-.49.37-1.02.68-1.6.91-.36.15-.58.53-.58.92 0 .72.73 1.18 1.39.91.8-.33 1.55-.77 2.22-1.31l1.34 1.34a.996.996 0 1 0 1.41-1.41L5.05 3.63c-.39-.39-1.02-.39-1.42 0zM19 12c0 .82-.15 1.61-.41 2.34l1.53 1.53c.56-1.17.88-2.48.88-3.87 0-3.83-2.4-7.11-5.78-8.4-.59-.23-1.22.23-1.22.86v.19c0 .38.25.71.61.85C17.18 6.54 19 9.06 19 12zm-8.71-6.29l-.17.17L12 7.76V6.41c0-.89-1.08-1.33-1.71-.7zM16.5 12A4.5 4.5 0 0 0 14 7.97v1.79l2.48 2.48c.01-.08.02-.16.02-.24z"/></svg>
-    <span>Tap to unmute</span>
-  </div>
 </div>
 
 <!-- Card Section -->
@@ -300,35 +184,18 @@ html, body {
   <a class="error-btn" id="errorBtn" href="https://wishcard.in">Go to WishCard.in</a>
 </div>
 
-<!-- Floating Buttons -->
-<div class="floating-buttons" id="floatingButtons">
-  <button class="float-btn" id="skipBtn">
-    <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
-    <span>Skip to Card</span>
-  </button>
-  <a class="float-btn" id="downloadBtn" download>
-    <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-    <span>Download Video</span>
-  </a>
-</div>
-
 <script type="module">
 import { db } from './js/firebase-config.js';
 import { doc, getDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // DOM elements
 const loadingScreen = document.getElementById('loadingScreen');
-const videoSection = document.getElementById('videoSection');
-const videoPlayer = document.getElementById('videoPlayer');
-const unmuteBtn = document.getElementById('unmuteBtn');
 const cardSection = document.getElementById('cardSection');
 const cardIframe = document.getElementById('cardIframe');
 const errorSection = document.getElementById('errorSection');
 const errorTitle = document.getElementById('errorTitle');
 const errorMessage = document.getElementById('errorMessage');
 const errorBtn = document.getElementById('errorBtn');
-const skipBtn = document.getElementById('skipBtn');
-const downloadBtn = document.getElementById('downloadBtn');
 
 // Parse cardId from URL: /card/abc123 -> "abc123"
 const pathParts = window.location.pathname.split('/');
@@ -336,7 +203,6 @@ const cardId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2
 
 function showError(title, message, btnText, btnAction) {
   loadingScreen.classList.add('hidden');
-  videoSection.classList.remove('active');
   cardSection.classList.remove('active');
   errorSection.classList.add('active');
   errorTitle.textContent = title;
@@ -346,17 +212,6 @@ function showError(title, message, btnText, btnAction) {
     errorBtn.href = '#';
     errorBtn.onclick = (e) => { e.preventDefault(); location.reload(); };
   }
-}
-
-function showCard(htmlUrl) {
-  videoSection.classList.add('fade-out');
-  skipBtn.classList.remove('visible');
-  setTimeout(() => {
-    videoSection.classList.remove('active');
-    videoSection.classList.remove('fade-out');
-    cardSection.classList.add('active');
-    cardIframe.src = htmlUrl;
-  }, 500);
 }
 
 function showCardImmediate(htmlUrl) {
@@ -386,67 +241,18 @@ async function loadCard() {
     try {
       await updateDoc(cardRef, { openCount: increment(1) });
     } catch (e) {
-      // Analytics increment failure should not block card viewing
       console.warn('Could not update openCount:', e);
     }
 
-    const { videoUrl, htmlUrl } = cardData;
+    const { htmlUrl } = cardData;
 
     if (!htmlUrl) {
       showError('Oops!', 'Card content not available. Please try again later.', 'Go to WishCard.in', null);
       return;
     }
 
-    // If video exists, play it first
-    if (videoUrl) {
-      loadingScreen.classList.add('hidden');
-      videoSection.classList.add('active');
-      skipBtn.classList.add('visible');
-
-      // Setup download button
-      downloadBtn.href = videoUrl;
-      downloadBtn.classList.add('visible');
-
-      videoPlayer.src = videoUrl;
-      videoPlayer.muted = true;
-      videoPlayer.playsInline = true;
-
-      // Attempt autoplay (muted)
-      try {
-        await videoPlayer.play();
-      } catch (e) {
-        // Autoplay blocked, user can tap to play
-        console.warn('Autoplay blocked:', e);
-      }
-
-      // Unmute handler
-      unmuteBtn.addEventListener('click', () => {
-        videoPlayer.muted = false;
-        unmuteBtn.classList.add('hidden');
-      });
-
-      // When video ends, transition to card
-      videoPlayer.addEventListener('ended', () => {
-        showCard(htmlUrl);
-      });
-
-      // Video error - skip to card
-      videoPlayer.addEventListener('error', () => {
-        showCard(htmlUrl);
-      });
-
-      // Skip button
-      skipBtn.addEventListener('click', () => {
-        videoPlayer.pause();
-        showCard(htmlUrl);
-      });
-
-    } else {
-      // No video, show card directly
-      showCardImmediate(htmlUrl);
-
-      // No download button if no video
-    }
+    // Show card directly
+    showCardImmediate(htmlUrl);
 
   } catch (error) {
     console.error('Error loading card:', error);
