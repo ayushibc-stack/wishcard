@@ -4,12 +4,11 @@
 import { db, storage } from './firebase-config.js';
 import { collection, doc, setDoc, getDoc, updateDoc, increment, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
-import { captureCardVideo, generateThumbnail } from './video-capture.js';
 
 /**
  * Main share function - handles the entire flow:
- * 1. Generate video from card
- * 2. Upload HTML, video, thumbnail to Storage
+ * 1. Generate thumbnail from dataUrl
+ * 2. Upload HTML, thumbnail to Storage
  * 3. Create Firestore document
  * 4. Return shareable link
  */
@@ -20,46 +19,22 @@ export async function shareCard({ htmlContent, thumbnailDataUrl, cardType, recip
     // Generate unique card ID
     const cardId = generateCardId();
 
-    // Step 1: Record video
-    const hasMediaRecorder = typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('video/webm');
-    let videoBlob = null;
-
-    if (hasMediaRecorder) {
-      progressUI.updateStep('recording');
-      const videoResult = await captureCardVideo(htmlContent, {
-        recipientName,
-        photoDataUrl: thumbnailDataUrl,
-        colors: colors || null
-      });
-      videoBlob = videoResult.videoBlob; // May be null if recording failed
-    }
-
-    // Step 2: Generate thumbnail
+    // Step 1: Generate thumbnail
     progressUI.updateStep('thumbnail');
     let thumbnailBlob = null;
-    try {
-      thumbnailBlob = await generateThumbnail(htmlContent, {
-        recipientName,
-        photoDataUrl: thumbnailDataUrl,
-        colors: colors || null
-      });
-    } catch (e) {
-      // If thumbnail generation fails and we have a dataUrl, convert it
-      if (thumbnailDataUrl) {
-        thumbnailBlob = dataUrlToBlob(thumbnailDataUrl);
-      }
+    if (thumbnailDataUrl) {
+      thumbnailBlob = dataUrlToBlob(thumbnailDataUrl);
     }
 
-    // Step 3: Upload files to Firebase Storage
+    // Step 2: Upload files to Firebase Storage
     progressUI.updateStep('uploading');
 
     const uploadResults = await uploadCardFiles(cardId, {
       htmlContent,
-      videoBlob,
       thumbnailBlob
     });
 
-    // Step 4: Create Firestore document
+    // Step 3: Create Firestore document
     progressUI.updateStep('saving');
 
     const cardDoc = {
@@ -69,14 +44,15 @@ export async function shareCard({ htmlContent, thumbnailDataUrl, cardType, recip
       occasion: occasion || '',
       createdAt: serverTimestamp(),
       openCount: 0,
-      videoUrl: uploadResults.videoUrl || null,
+      videoUrl: null,
+      videoStatus: 'none',
       thumbnailUrl: uploadResults.thumbnailUrl || null,
       htmlUrl: uploadResults.htmlUrl || null
     };
 
     await setDoc(doc(db, 'cards', cardId), cardDoc);
 
-    // Step 5: Done!
+    // Step 4: Done!
     progressUI.updateStep('done');
 
     setTimeout(() => {
@@ -101,7 +77,7 @@ export function getShareableLink(cardId) {
 
 /**
  * Show the share UI modal/overlay
- * Displays: shareable link, copy button, WhatsApp share button, download fallback
+ * Displays: shareable link, copy button, WhatsApp share button
  */
 export function showShareUI(cardId, recipientName, cardType) {
   // Remove any existing share modal
@@ -134,10 +110,6 @@ export function showShareUI(cardId, recipientName, cardType) {
             <span class="wc-share-btn-icon">&#128172;</span>
             WhatsApp pe bhejo
           </a>
-          <button class="wc-share-btn wc-share-download" id="wc-share-download-btn">
-            <span class="wc-share-btn-icon">&#128229;</span>
-            Phone me Download karo
-          </button>
         </div>
 
         <p class="wc-share-footer">Made with &#10084;&#65039; on WishCard.in</p>
@@ -178,7 +150,7 @@ export function showShareUI(cardId, recipientName, cardType) {
 
 /**
  * Show progress UI during upload process
- * Steps: Recording video... Uploading card... Generating link...
+ * Steps: Thumbnail... Uploading... Saving... Done!
  */
 export function showProgressUI() {
   // Remove any existing progress modal
@@ -194,7 +166,6 @@ export function showProgressUI() {
   }
 
   const steps = [
-    { id: 'recording', label: 'Video record ho raha hai...' },
     { id: 'thumbnail', label: 'Thumbnail bana rahe hain...' },
     { id: 'uploading', label: 'Card upload ho raha hai...' },
     { id: 'saving', label: 'Link generate ho raha hai...' },
@@ -246,92 +217,6 @@ export function showProgressUI() {
       }
     }
   };
-}
-
-/**
- * Show the card preview after generation (before sharing)
- * Displays the card in an iframe with Share and Download buttons
- */
-export function showCardPreview(htmlContent, metadata = {}) {
-  const { recipientName, cardType, occasion, thumbnailDataUrl, colors } = metadata;
-
-  // Remove any existing preview modal
-  const existing = document.getElementById('wishcard-preview-modal');
-  if (existing) existing.remove();
-
-  // Inject styles if needed
-  if (!document.getElementById('wishcard-share-styles')) {
-    const style = document.createElement('style');
-    style.id = 'wishcard-share-styles';
-    style.textContent = getShareStyles();
-    document.head.appendChild(style);
-  }
-
-  const modal = document.createElement('div');
-  modal.id = 'wishcard-preview-modal';
-  modal.innerHTML = `
-    <div class="wc-share-overlay">
-      <div class="wc-share-card wc-preview-card">
-        <button class="wc-share-close" onclick="document.getElementById('wishcard-preview-modal').remove()">&times;</button>
-        <h2 class="wc-share-title">Card Preview &#127912;</h2>
-        <div class="wc-preview-iframe-wrap">
-          <iframe class="wc-preview-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
-        </div>
-        <div class="wc-share-buttons">
-          <button class="wc-share-btn wc-share-whatsapp" id="wc-preview-share-btn">
-            <span class="wc-share-btn-icon">&#128279;</span>
-            Share via Link
-          </button>
-          <button class="wc-share-btn wc-share-download" id="wc-preview-download-btn">
-            <span class="wc-share-btn-icon">&#128229;</span>
-            Phone me Download karo
-          </button>
-          <button class="wc-share-btn wc-share-back" id="wc-preview-back-btn">
-            &#8592; Back to Edit
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  // Load HTML content into iframe
-  const iframe = modal.querySelector('.wc-preview-iframe');
-  iframe.srcdoc = htmlContent;
-
-  // Share button handler
-  document.getElementById('wc-preview-share-btn').addEventListener('click', async () => {
-    modal.remove();
-    const result = await shareCard({
-      htmlContent,
-      thumbnailDataUrl,
-      cardType,
-      recipientName,
-      occasion,
-      colors
-    });
-    if (result.success) {
-      showShareUI(result.cardId, recipientName, cardType);
-    } else {
-      showErrorToast(result.error || 'Share failed. Please try again.');
-    }
-  });
-
-  // Back button handler
-  document.getElementById('wc-preview-back-btn').addEventListener('click', () => {
-    modal.remove();
-  });
-
-  // Download button handler
-  document.getElementById('wc-preview-download-btn').addEventListener('click', () => {
-    if (metadata.downloadFn) {
-      metadata.downloadFn();
-      modal.remove();
-    }
-  });
-
-  return modal;
 }
 
 // --- Internal helpers ---
@@ -392,21 +277,14 @@ function generateCardId() {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 10);
 }
 
-async function uploadCardFiles(cardId, { htmlContent, videoBlob, thumbnailBlob }) {
-  const results = { htmlUrl: null, videoUrl: null, thumbnailUrl: null };
+async function uploadCardFiles(cardId, { htmlContent, thumbnailBlob }) {
+  const results = { htmlUrl: null, thumbnailUrl: null };
 
   // Upload HTML card
   const htmlRef = ref(storage, `cards/${cardId}/card.html`);
   const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
   await uploadBytes(htmlRef, htmlBlob, { contentType: 'text/html' });
   results.htmlUrl = await getDownloadURL(htmlRef);
-
-  // Upload video (if available)
-  if (videoBlob) {
-    const videoRef = ref(storage, `cards/${cardId}/video.webm`);
-    await uploadBytes(videoRef, videoBlob, { contentType: 'video/webm' });
-    results.videoUrl = await getDownloadURL(videoRef);
-  }
 
   // Upload thumbnail (if available)
   if (thumbnailBlob) {
@@ -634,25 +512,6 @@ function getShareStyles() {
     }
     @keyframes wcSpin {
       to { transform: rotate(360deg); }
-    }
-    /* Preview UI */
-    .wc-preview-card {
-      max-width: 400px;
-      padding: 24px 20px;
-    }
-    .wc-preview-iframe-wrap {
-      width: 100%;
-      aspect-ratio: 9/16;
-      max-height: 50vh;
-      border-radius: 12px;
-      overflow: hidden;
-      margin: 16px 0;
-      border: 1px solid rgba(167,139,250,0.3);
-    }
-    .wc-preview-iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
     }
   `;
 }
