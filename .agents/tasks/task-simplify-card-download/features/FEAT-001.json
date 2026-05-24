@@ -34,5 +34,5 @@
     "Verify firebase.json, .firebaserc, functions/index.js still exist unchanged"
   ],
   "blocked_reason": null,
-  "findings": "All 4 HTML files updated successfully. video-capture.js rewritten with single recordCardVideo export. HD save uses Canvas 2D manual drawing. The congrats.html file needed special handling due to its larger generated HTML template that was cut. No build or test runner in this project - validation was structural (JS syntax check, grep for removed references)."
+  "findings": "All 4 HTML files updated successfully. video-capture.js rewritten with single recordCardVideo export. HD save uses Canvas 2D manual drawing. The congrats.html file needed special handling due to its larger generated HTML template that was cut. No build or test runner in this project - validation was structural (JS syntax check, grep for removed references). Review v1 issues addressed: (1) video-capture.js now supports layout option for fullphoto rendering, (2) birthday.html doHDSave word-wraps message text, (3) birthday.html doHDSave has 5s image timeout, (4) UI copy changed from Cinematic/Generate Presentation to Card Download Karo, particles added to on-page card display."
 }
