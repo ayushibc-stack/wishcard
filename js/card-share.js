@@ -7,50 +7,55 @@ import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/fireba
 
 /**
  * Main share function - handles the entire flow:
- * 1. Generate thumbnail from passed dataUrl
- * 2. Upload HTML + thumbnail to Storage
- * 3. Create Firestore document
- * 4. Return shareable link
+ * 1. Upload photo (if provided) to Storage
+ * 2. Create Firestore document with all card metadata
+ * 3. Return shareable link
  */
-export async function shareCard({ htmlContent, thumbnailDataUrl, cardType, recipientName, occasion }) {
+export async function shareCard({ cardType, recipientName, wishText, message, occasion, theme, border, font, photoDataUrl, years, name2, tagLine, showGlassPlate, achievement }) {
   const progressUI = showProgressUI();
 
   try {
     // Generate unique card ID
     const cardId = generateCardId();
 
-    // Step 1: Thumbnail
-    progressUI.updateStep('thumbnail');
-    let thumbnailBlob = null;
-    if (thumbnailDataUrl) {
-      thumbnailBlob = dataUrlToBlob(thumbnailDataUrl);
+    // Step 1: Upload photo if provided
+    progressUI.updateStep('photo');
+    let photoUrl = null;
+    if (photoDataUrl) {
+      photoUrl = await uploadPhoto(cardId, photoDataUrl);
     }
 
-    // Step 2: Upload files to Firebase Storage
-    progressUI.updateStep('uploading');
-
-    const uploadResults = await uploadCardFiles(cardId, {
-      htmlContent,
-      thumbnailBlob
-    });
-
-    // Step 3: Create Firestore document
+    // Step 2: Save card data to Firestore
     progressUI.updateStep('saving');
 
     const cardDoc = {
       cardId,
       cardType: cardType || 'birthday',
       recipientName: recipientName || '',
-      occasion: occasion || '',
-      createdAt: serverTimestamp(),
       openCount: 0,
-      videoUrl: null,
-      videoStatus: 'none',
-      thumbnailUrl: uploadResults.thumbnailUrl || null,
-      htmlUrl: uploadResults.htmlUrl || null
+      createdAt: serverTimestamp(),
+      photoUrl: photoUrl || null
     };
 
+    // Include optional fields only if provided
+    if (wishText) cardDoc.wishText = wishText;
+    if (message) cardDoc.message = message;
+    if (occasion) cardDoc.occasion = occasion;
+    if (theme) cardDoc.theme = theme;
+    if (border) cardDoc.border = border;
+    if (font) cardDoc.font = font;
+    if (years) cardDoc.years = years;
+    if (name2) cardDoc.name2 = name2;
+    if (tagLine) cardDoc.tagLine = tagLine;
+    if (showGlassPlate !== undefined) cardDoc.showGlassPlate = showGlassPlate;
+    if (achievement) cardDoc.achievement = achievement;
+
     await setDoc(doc(db, 'cards', cardId), cardDoc);
+
+    // Step 3: Generate link
+    progressUI.updateStep('link');
+
+    const shareUrl = getShareableLink(cardId);
 
     // Step 4: Done!
     progressUI.updateStep('done');
@@ -59,7 +64,6 @@ export async function shareCard({ htmlContent, thumbnailDataUrl, cardType, recip
       progressUI.hide();
     }, 1500);
 
-    const shareUrl = getShareableLink(cardId);
     return { cardId, shareUrl, success: true, error: null };
 
   } catch (err) {
@@ -150,7 +154,7 @@ export function showShareUI(cardId, recipientName, cardType) {
 
 /**
  * Show progress UI during upload process
- * Steps: Thumbnail, Uploading, Saving, Done
+ * Steps: Photo, Saving, Link, Done
  */
 export function showProgressUI() {
   // Remove any existing progress modal
@@ -166,9 +170,9 @@ export function showProgressUI() {
   }
 
   const steps = [
-    { id: 'thumbnail', label: 'Thumbnail bana rahe hain...' },
-    { id: 'uploading', label: 'Card upload ho raha hai...' },
-    { id: 'saving', label: 'Link generate ho raha hai...' },
+    { id: 'photo', label: 'Photo upload ho rahi hai...' },
+    { id: 'saving', label: 'Data save ho raha hai...' },
+    { id: 'link', label: 'Link generate ho raha hai...' },
     { id: 'done', label: 'Ho gaya! &#127881;' }
   ];
 
@@ -277,23 +281,15 @@ function generateCardId() {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 10);
 }
 
-async function uploadCardFiles(cardId, { htmlContent, thumbnailBlob }) {
-  const results = { htmlUrl: null, thumbnailUrl: null };
-
-  // Upload HTML card
-  const htmlRef = ref(storage, `cards/${cardId}/card.html`);
-  const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
-  await uploadBytes(htmlRef, htmlBlob, { contentType: 'text/html' });
-  results.htmlUrl = await getDownloadURL(htmlRef);
-
-  // Upload thumbnail (if available)
-  if (thumbnailBlob) {
-    const thumbRef = ref(storage, `cards/${cardId}/thumbnail.png`);
-    await uploadBytes(thumbRef, thumbnailBlob, { contentType: 'image/png' });
-    results.thumbnailUrl = await getDownloadURL(thumbRef);
-  }
-
-  return results;
+/**
+ * Upload photo to Firebase Storage and return the download URL
+ */
+async function uploadPhoto(cardId, photoDataUrl) {
+  const blob = dataUrlToBlob(photoDataUrl);
+  const ext = blob.type === 'image/jpeg' ? 'jpeg' : 'png';
+  const photoRef = ref(storage, `cards/${cardId}/photo.${ext}`);
+  await uploadBytes(photoRef, blob, { contentType: blob.type });
+  return await getDownloadURL(photoRef);
 }
 
 function dataUrlToBlob(dataUrl) {
