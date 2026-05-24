@@ -272,7 +272,7 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
   <div class="sec">
     <div class="sh"><div class="sicon">✨</div><div><div class="st">Card Banao</div></div></div>
     <button class="btn-dl" onclick="dlCard()">🏆 Congratulations Card Download Karo</button>
-    <p class="fn">HTML file — full cinematic animation ✨<br>Andar 📸 HD Save button bhi hoga</p>
+    <p class="fn">📸 HD Photo + 🎬 5 Second Video milegi</p>
   </div>
 
 </div>
@@ -308,11 +308,8 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
 </div>
 
 <script type="module">
-import { showCardPreview, shareCard, showShareUI } from './js/card-share.js';
-import './js/firebase-config.js';
-window._showCardPreview = showCardPreview;
-window._shareCard = shareCard;
-window._showShareUI = showShareUI;
+import { recordCardVideo } from './js/video-capture.js';
+window._recordCardVideo = recordCardVideo;
 </script>
 <script>
 // ── UTILITIES ──
@@ -551,264 +548,109 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function dlCard(){
   const o=OCCASIONS.find(x=>x.k===cOcc)||OCCASIONS[0];
   const t=THEMES[cTheme];
-  const b=BORDERS[cBorder];
   const fn=FONTS[cFont];
-  const nm=esc(document.getElementById('ni').value.trim()||'Aapka Naam');
-  const ac=esc(document.getElementById('ai').value.trim()||'');
-  const ms=esc(document.getElementById('mi').value.trim()||o.msg);
-  const sn=(document.getElementById('ni').value.trim()||'congrats').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
-  const pc=JSON.stringify(t.pc);
+  const nm=document.getElementById('ni').value.trim()||'Aapka Naam';
+  const ac=document.getElementById('ai').value.trim()||'';
+  const ms=document.getElementById('mi').value.trim()||o.msg;
+  const sn=(nm||'congrats').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
   const photoHTML=cropData?`<img src="${cropData}" style="width:100%;height:100%;object-fit:cover;display:block;">`:`<div style="width:100%;height:100%;background:linear-gradient(160deg,#1a1200,#050400);display:flex;align-items:center;justify-content:center;font-size:80px;">${o.emoji}</div>`;
 
-  const html=`<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Congratulations ${nm}!</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Great+Vibes&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;background:#060409;}
-body{display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;padding:16px 16px 40px;min-height:100vh;position:relative;}
-.amb{position:fixed;inset:0;background:radial-gradient(ellipse at center,${t.ov} 0%,transparent 65%);pointer-events:none;}
-/* Intro */
-.intro{position:fixed;inset:0;background:#060409;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;animation:iOut .8s ease 2s forwards;}
-@keyframes iOut{to{opacity:0;pointer-events:none;}}
-.i-tag{font-size:9px;letter-spacing:6px;text-transform:uppercase;color:${t.glow}88;animation:iIn .7s ease .2s both;}
-.i-name{font-family:${fn.f};font-size:clamp(30px,8vw,48px);font-weight:${fn.weight};color:white;text-shadow:${t.glowStr};animation:iIn .7s ease .4s both;}
-.i-occ{font-size:13px;color:${t.glow};animation:iIn .7s ease .6s both;}
-@keyframes iIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
-/* Wrap */
-.wrap{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:400px;animation:wIn 1s ease 2.4s both;}
-@keyframes wIn{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:none;}}
-/* Card */
-.card{width:min(340px,86vw);aspect-ratio:9/16;border-radius:24px;overflow:hidden;position:relative;box-shadow:0 28px 90px rgba(0,0,0,0.9),${b.outerCss};}
-/* Layers */
-.l-ph{position:absolute;inset:0;overflow:hidden;}
-.l-ph>*{width:100%;height:100%;object-fit:cover;display:block;animation:kb 18s ease-in-out infinite alternate;}
-@keyframes kb{from{transform:scale(1);}to{transform:scale(1.09) translate(-1%,-1%);}}
-.l-vign{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 26%,rgba(0,0,0,0.65) 100%);}
-.l-theme{position:absolute;inset:0;background:${t.ov};}
-.l-fade{position:absolute;inset:0;background:linear-gradient(to top,${t.fade} 0%,rgba(0,0,0,0.5) 30%,rgba(0,0,0,0.1) 52%,transparent 70%);}
-.l-border{position:absolute;inset:0;border-radius:24px;box-shadow:${b.css};pointer-events:none;}
-/* Sparkles */
-.sparks{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
-.sp{position:absolute;border-radius:50%;background:${t.g2};animation:sparkle var(--sd) ease-in-out infinite alternate;opacity:0;}
-@keyframes sparkle{from{opacity:0;transform:scale(.4);}to{opacity:.9;transform:scale(2);}}
-/* Particles */
-.parts{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
-.pt{position:absolute;opacity:0;animation:ptf var(--fd) linear var(--fd2) infinite;}
-@keyframes ptf{0%{transform:translateY(-10px) rotate(0);opacity:0;}8%{opacity:.85;}100%{transform:translateY(101%) rotate(540deg);opacity:0;}}
-/* Confetti */
-.cw{position:fixed;inset:0;pointer-events:none;z-index:200;}
-.cf{position:absolute;opacity:0;animation:cff var(--cd) ease var(--cd2) forwards;}
-@keyframes cff{0%{opacity:1;transform:translate(0,0) rotate(0);}100%{opacity:0;transform:translate(var(--cx),100vh) rotate(900deg) scale(.1);}}
-/* Text */
-.l-txt{position:absolute;bottom:0;left:0;right:0;padding:0 18px 22px;text-align:center;}
-.glass{background:${t.glass};backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:16px;padding:14px 16px;border:1px solid ${t.glow}22;}
-.tag{font-size:8px;letter-spacing:5px;text-transform:uppercase;color:${t.glow}88;display:block;margin-bottom:4px;opacity:0;animation:fu .7s ease 2.8s forwards;}
-.occ{font-size:11px;font-weight:700;color:${t.glow};display:block;margin-bottom:4px;text-shadow:0 0 20px ${t.glow}88;opacity:0;animation:fu .7s ease 2.95s forwards;}
-.name{font-family:${fn.f};font-size:${fn.nameSize};font-weight:${fn.weight};color:white;line-height:1.05;display:block;text-shadow:${t.glowStr};opacity:0;animation:fu .7s ease 3.1s forwards;}
-.achieve{font-size:clamp(10px,2.5vw,12px);color:${t.g2}99;display:block;margin-top:4px;opacity:0;animation:fu .7s ease 3.25s forwards;}
-.divider{display:flex;align-items:center;gap:8px;margin:8px 0;opacity:0;animation:fu .7s ease 3.4s forwards;}
-.divider span{flex:1;height:1px;background:${t.divBg};}
-.msg{font-size:clamp(10px,2.5vw,12px);color:rgba(255,255,255,0.52);line-height:1.7;display:block;opacity:0;animation:fu .7s ease 3.55s forwards;}
-@keyframes fu{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
-/* Buttons */
-.btns{display:flex;gap:10px;width:min(340px,86vw);}
-.btn-hd{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);border-radius:13px;padding:13px;color:#f5e17a;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .22s;animation:fu .7s ease 3.8s both;}
-.btn-hd:hover{background:rgba(212,175,55,0.2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,175,55,0.2);}
-.badge{font-size:9px;color:rgba(255,255,255,0.14);letter-spacing:2px;text-transform:uppercase;animation:fu .7s ease 3.9s both;}
-</style>
-</head>
-<body>
-<div class="amb"></div>
-<div class="intro">
-  <div class="i-tag">A Special Moment</div>
-  <div class="i-name">${nm}</div>
-  <div class="i-occ">${o.tag}</div>
-</div>
-<div class="cw" id="cw"></div>
-<div class="wrap">
-  <div class="card" id="card">
-    <div class="l-ph">${photoHTML}</div>
-    <div class="l-vign"></div>
-    <div class="l-theme"></div>
-    <div class="l-fade"></div>
-    <div class="sparks" id="sparks"></div>
-    <div class="parts" id="parts"></div>
-    <div class="l-border"></div>
-    <div class="l-txt">
-      <div class="glass">
-        <span class="tag">✦ &nbsp; CONGRATULATIONS &nbsp; ✦</span>
-        <span class="occ">${o.tag}</span>
-        <span class="name">${nm}</span>
-        <span class="achieve">${ac}</span>
-        <div class="divider"><span></span><em style="font-style:normal">${o.emoji}</em><span></span></div>
-        <span class="msg">${ms} 💫</span>
+  document.querySelector('.form-col').style.display='none';
+  document.querySelector('.preview-col').style.display='none';
+
+  let co=document.getElementById('cardOutput');
+  if(!co){
+    co=document.createElement('div');
+    co.id='cardOutput';
+    co.style.cssText='width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px 50px;position:relative;z-index:1;';
+    document.querySelector('.page').appendChild(co);
+  }
+  co.style.display='flex';
+
+  co.innerHTML=`
+    <div id="cardDisplay" style="width:min(340px,86vw);aspect-ratio:9/16;border-radius:24px;overflow:hidden;position:relative;box-shadow:0 28px 90px rgba(0,0,0,0.9);">
+      <div style="position:absolute;inset:0;overflow:hidden;">${photoHTML}</div>
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 26%,rgba(0,0,0,0.65) 100%);"></div>
+      <div style="position:absolute;inset:0;background:${t.ov};"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,${t.fade} 0%,rgba(0,0,0,0.5) 30%,rgba(0,0,0,0.1) 52%,transparent 70%);"></div>
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:0 18px 22px;text-align:center;z-index:10;">
+        <div style="background:${t.glass};backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:16px;padding:14px 16px;border:1px solid ${t.glow}22;">
+          <span style="font-size:8px;letter-spacing:5px;text-transform:uppercase;color:${t.glow}88;display:block;margin-bottom:4px;">&#10022; CONGRATULATIONS &#10022;</span>
+          <span style="font-size:11px;font-weight:700;color:${t.glow};display:block;margin-bottom:4px;">${esc(o.tag)}</span>
+          <span style="font-family:${fn.f};font-size:${fn.nameSize};font-weight:${fn.weight};color:white;line-height:1.05;display:block;text-shadow:${t.glowStr};">${esc(nm)}</span>
+          ${ac?`<span style="font-size:11px;color:${t.g2}99;display:block;margin-top:4px;">${esc(ac)}</span>`:''}
+          <div style="display:flex;align-items:center;gap:8px;margin:8px 0;justify-content:center;"><span style="flex:1;height:1px;background:${t.divBg};"></span><em style="font-style:normal">${o.emoji}</em><span style="flex:1;height:1px;background:${t.divBg};"></span></div>
+          <span style="font-size:11px;color:rgba(255,255,255,0.52);line-height:1.7;display:block;">${esc(ms)}</span>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="btns">
-    <button class="btn-hd" id="hdBtn" onclick="handleHDSave()">📸 HD Photo Save Karo</button>
-  </div>
-  <div class="badge">✦ WishCard.in</div>
-</div>
-<script>
-(function(){
-  var pc=${pc};
-  var glow='${t.g2}';
-  // Sparkles
-  var sw=document.getElementById('sparks');
-  for(var i=0;i<20;i++){var s=document.createElement('div');s.className='sp';var sz=Math.random()>0.5?3:2;s.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;width:'+sz+'px;height:'+sz+'px;--sd:'+(Math.random()*2.5+1).toFixed(1)+'s;animation-delay:'+(Math.random()*3).toFixed(1)+'s;';sw.appendChild(s);}
-  // Particles
-  var pp=document.getElementById('parts');
-  for(var j=0;j<pc.length*5;j++){var el=document.createElement('div');el.className='pt';var w=Math.random()*5+3;el.style.cssText='left:'+Math.random()*100+'%;width:'+w+'px;height:'+w+'px;border-radius:'+(Math.random()>.5?'0 50% 0 50%':'50%')+';background:'+pc[j%pc.length]+';--fd:'+(Math.random()*9+6).toFixed(1)+'s;--fd2:'+(Math.random()*12).toFixed(1)+'s;';pp.appendChild(el);}
-  // Confetti burst
-  var cw=document.getElementById('cw');
-  setTimeout(function(){for(var k=0;k<90;k++){var c=document.createElement('div');c.className='cf';var cx=(Math.random()-.5)*window.innerWidth*1.8;var w=Math.random()*7+4;c.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*20+'%;width:'+w+'px;height:'+w+'px;background:'+pc[k%pc.length]+';--cd:'+(Math.random()*2.5+1).toFixed(1)+'s;--cd2:'+(Math.random()*.8).toFixed(2)+'s;--cx:'+cx.toFixed(0)+'px;border-radius:'+(Math.random()>.5?'50%':'2px')+';';cw.appendChild(c);}},2600);
-})();
-// HD Save — Canvas 2D API Export
-function handleHDSave(){
-  var btn = document.getElementById('hdBtn');
-  btn.textContent = '⏳ Saving Card...'; btn.disabled = true;
-
-  requestAnimationFrame(function() {
-    setTimeout(function() {
-      try {
-        var cv = document.createElement('canvas');
-        var W = 1080; var H = 1920;
-        cv.width = W; cv.height = H;
-        var ctx = cv.getContext('2d');
-
-        var m = {
-          ov: '${t.ov}',
-          fade: '${t.fade}',
-          glow: '${t.glow}',
-          swL: '${t.sw}'
-        };
-        var nm = '${nm}';
-        var wh = '${o.tag}';
-        var rmg = '${ms}';
-        var sn = '${sn}';
-        var plateState = true;
-
-        var renderLayout = function() {
-          // Vignette layer
-          var vign = ctx.createRadialGradient(W/2, H/2, W*0.2, W/2, H/2, H*0.7);
-          vign.addColorStop(0, 'transparent'); vign.addColorStop(1, 'rgba(0,0,0,0.65)');
-          ctx.fillStyle = vign; ctx.fillRect(0,0,W,H);
-
-          // Color overlay mood
-          ctx.fillStyle = m.ov; ctx.fillRect(0,0,W,H);
-
-          // Black bottom lighting gradient
-          var fade = ctx.createLinearGradient(0, H*0.35, 0, H);
-          fade.addColorStop(0, 'transparent'); fade.addColorStop(1, m.fade);
-          ctx.fillStyle = fade; ctx.fillRect(0,0,W,H);
-
-          var pX=70, pY=H-660, pW=W-140, pH=540, pR=32;
-
-          // Glass Plate
-          if (plateState) {
-            ctx.save(); ctx.beginPath();
-            ctx.moveTo(pX+pR, pY); ctx.lineTo(pX+pW-pR, pY); ctx.quadraticCurveTo(pX+pW, pY, pX+pW, pY+pR);
-            ctx.lineTo(pX+pW, pY+pH-pR); ctx.quadraticCurveTo(pX+pW, pY+pH, pX+pW-pR, pY+pH);
-            ctx.lineTo(pX+pR, pY+pH); ctx.quadraticCurveTo(pX, pY+pH, pX, pY+pH-pR);
-            ctx.lineTo(pX, pY+pR); ctx.quadraticCurveTo(pX, pY, pX+pR, pY);
-            ctx.closePath();
-            ctx.fillStyle = "rgba(0, 0, 0, 0.45)"; ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
-            ctx.lineWidth = 3; ctx.fill(); ctx.stroke(); ctx.restore();
-          }
-
-          // Text layout
-          ctx.textAlign = "center";
-          ctx.font = "600 26px 'Outfit', sans-serif"; ctx.fillStyle = "rgba(255,255,255,0.4)";
-          ctx.fillText("\\u2726   CONGRATULATIONS   \\u2726", W/2, pY+80);
-
-          ctx.save(); ctx.font = "700 95px 'Cormorant Garamond', serif"; ctx.fillStyle = "#ffffff";
-          ctx.shadowColor = m.glow; ctx.shadowBlur = 30;
-          ctx.fillText(nm, W/2, pY+200); ctx.restore();
-
-          ctx.font = "italic 600 46px 'Cormorant Garamond', serif"; ctx.fillStyle = m.glow;
-          ctx.fillText(wh, W/2, pY+280);
-
-          ctx.strokeStyle = "rgba(255,255,255,0.15)"; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(pX+80, pY+330); ctx.lineTo(W/2-50, pY+330);
-          ctx.moveTo(W/2+50, pY+330); ctx.lineTo(pX+pW-80, pY+330); ctx.stroke();
-          ctx.font = "32px 'Outfit', sans-serif"; ctx.fillText("\\u{1F396}", W/2, pY+342);
-
-          ctx.font = "400 34px 'Outfit', sans-serif"; ctx.fillStyle = "rgba(255,255,255,0.55)";
-          var words = rmg.split(' '), line = '', lineY = pY+415;
-          for(var n=0; n<words.length; n++) {
-            var testLine = line + words[n] + ' ';
-            if (ctx.measureText(testLine).width > pW-120 && n>0) {
-              ctx.fillText(line, W/2, lineY); line = words[n] + ' '; lineY += 52;
-            } else { line = testLine; }
-          }
-          ctx.fillText(line, W/2, lineY);
-
-          // Force download
-          var link = document.createElement('a');
-          link.download = 'Congrats_Card_' + sn + '.png';
-          link.href = cv.toDataURL('image/png', 1.0);
-          link.click();
-
-          btn.textContent = '\\u{1F4F8} HD Photo Save Karo'; btn.disabled = false;
-        };
-
-        var imgEl = document.querySelector('.l-ph img');
-        if(imgEl && imgEl.src) {
-          var bg = new Image();
-          bg.onload = function() { ctx.drawImage(bg, 0, 0, W, H); renderLayout(); };
-          bg.onerror = function() { ctx.fillStyle="#0a0800"; ctx.fillRect(0,0,W,H); renderLayout(); };
-          bg.src = imgEl.src;
-        } else {
-          ctx.fillStyle = "#0a0800"; ctx.fillRect(0,0,W,H); renderLayout();
-        }
-      } catch(err) {
-        console.error(err);
-        btn.textContent = '\\u{1F4F8} HD Photo Save Karo'; btn.disabled = false;
-      }
-    }, 60);
-  });
-}
-<\/script>
-</body>
-</html>`;
-
-  // Show preview with share options
-  if (window._showCardPreview) {
-    const downloadFn = function() {
-      const bl = new Blob([html], {type: 'text/html;charset=utf-8'});
-      const ur = URL.createObjectURL(bl);
-      const a = document.createElement('a');
-      a.href = ur; a.download = 'congrats_' + sn + '.html';
-      document.body.appendChild(a); a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(ur), 1000);
-    };
-    const o = OCCASIONS.find(x => x.k === cOcc) || OCCASIONS[0];
-    window._showCardPreview(html, {
-      recipientName: document.getElementById('ni').value.trim() || 'Friend',
-      cardType: 'congrats',
-      occasion: o.tag || 'Congratulations',
-      thumbnailDataUrl: cropData || null,
-      colors: { primary: THEMES[cTheme].sw, secondary: THEMES[cTheme].swLine, accent: THEMES[cTheme].glow, glow: THEMES[cTheme].g2, particles: THEMES[cTheme].glow },
-      downloadFn: downloadFn
-    });
-  } else {
-    // Fallback: direct download if module not loaded
-    const bl = new Blob([html], {type: 'text/html;charset=utf-8'});
-    const ur = URL.createObjectURL(bl);
-    const a = document.createElement('a');
-    a.href = ur; a.download = 'congrats_' + sn + '.html';
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(ur), 1000);
-  }
+    <div style="display:flex;flex-direction:column;gap:10px;width:min(340px,86vw);margin-top:14px;">
+      <button id="hdBtn" onclick="doHDSave()" style="display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);border-radius:13px;padding:13px;color:#f5e17a;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;width:100%;transition:all .22s;">&#128248; HD Photo Save Karo</button>
+      <button id="vidBtn" onclick="doVideoDownload()" style="display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);border-radius:13px;padding:13px;color:#f5e17a;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;width:100%;transition:all .22s;">&#127916; Video Download Karo</button>
+      <a href="#" onclick="backToEdit();return false;" style="text-align:center;color:var(--t3);font-size:12px;margin-top:8px;text-decoration:none;">&#8592; Back to Edit</a>
+    </div>
+    <p style="font-size:9px;color:rgba(255,255,255,0.14);letter-spacing:2px;text-transform:uppercase;margin-top:14px;">&#10022; WishCard.in</p>
+  `;
   upS(4);
+}
+
+function backToEdit(){
+  document.querySelector('.form-col').style.display='';
+  var pc=document.querySelector('.preview-col');if(pc)pc.style.display='';
+  var co=document.getElementById('cardOutput');if(co)co.style.display='none';
+}
+
+function doHDSave(){
+  var btn=document.getElementById('hdBtn');
+  btn.textContent='\u23F3 Saving Card...';btn.disabled=true;
+  var o=OCCASIONS.find(function(x){return x.k===cOcc;})||OCCASIONS[0];
+  var t=THEMES[cTheme];
+  var nm=document.getElementById('ni').value.trim()||'Aapka Naam';
+  var ms=document.getElementById('mi').value.trim()||o.msg;
+  var sn=(nm||'congrats').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  try{
+    var cv=document.createElement('canvas');
+    var W=1080,H=1920;cv.width=W;cv.height=H;
+    var ctx=cv.getContext('2d');
+    var renderLayout=function(){
+      var vign=ctx.createRadialGradient(W/2,H/2,W*0.2,W/2,H/2,H*0.7);
+      vign.addColorStop(0,'transparent');vign.addColorStop(1,'rgba(0,0,0,0.65)');
+      ctx.fillStyle=vign;ctx.fillRect(0,0,W,H);
+      ctx.fillStyle=t.ov;ctx.fillRect(0,0,W,H);
+      var fade=ctx.createLinearGradient(0,H*0.35,0,H);
+      fade.addColorStop(0,'transparent');fade.addColorStop(1,t.fade);
+      ctx.fillStyle=fade;ctx.fillRect(0,0,W,H);
+      var pX=70,pY=H-660,pW=W-140;
+      ctx.textAlign='center';
+      ctx.font="600 26px 'Outfit', sans-serif";ctx.fillStyle='rgba(255,255,255,0.4)';
+      ctx.fillText('\u2726   CONGRATULATIONS   \u2726',W/2,pY+80);
+      ctx.save();ctx.font="700 95px 'Cormorant Garamond', serif";ctx.fillStyle='#ffffff';
+      ctx.shadowColor=t.glow;ctx.shadowBlur=30;ctx.fillText(nm,W/2,pY+200);ctx.restore();
+      ctx.font="italic 600 46px 'Cormorant Garamond', serif";ctx.fillStyle=t.glow;
+      ctx.fillText(o.tag,W/2,pY+280);
+      ctx.font="400 34px 'Outfit', sans-serif";ctx.fillStyle='rgba(255,255,255,0.55)';
+      var words=ms.split(' '),line='',lineY=pY+380;
+      for(var n=0;n<words.length;n++){var testLine=line+words[n]+' ';if(ctx.measureText(testLine).width>pW-120&&n>0){ctx.fillText(line,W/2,lineY);line=words[n]+' ';lineY+=52;}else{line=testLine;}}
+      ctx.fillText(line,W/2,lineY);
+      var link=document.createElement('a');link.download='Congrats_Card_'+sn+'.png';link.href=cv.toDataURL('image/png',1.0);link.click();
+      btn.textContent='\u2705 Saved!';setTimeout(function(){btn.textContent='\ud83d\udcf8 HD Photo Save Karo';btn.disabled=false;},3000);
+    };
+    if(cropData){var bg=new Image();bg.onload=function(){ctx.drawImage(bg,0,0,W,H);renderLayout();};bg.onerror=function(){ctx.fillStyle='#0a0800';ctx.fillRect(0,0,W,H);renderLayout();};bg.src=cropData;}
+    else{ctx.fillStyle='#0a0800';ctx.fillRect(0,0,W,H);renderLayout();}
+  }catch(err){console.error(err);btn.textContent='\ud83d\udcf8 HD Photo Save Karo';btn.disabled=false;}
+}
+
+function doVideoDownload(){
+  var btn=document.getElementById('vidBtn');
+  btn.textContent='\u23F3 Video ban rahi hai...';btn.disabled=true;
+  var o=OCCASIONS.find(function(x){return x.k===cOcc;})||OCCASIONS[0];
+  var t=THEMES[cTheme];
+  var nm=document.getElementById('ni').value.trim()||'Aapka Naam';
+  var ms=document.getElementById('mi').value.trim()||o.msg;
+  var sn=(nm||'congrats').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  if(window._recordCardVideo){
+    window._recordCardVideo({photoDataUrl:cropData||null,recipientName:nm,wishText:o.tag,message:ms,colors:{primary:t.sw,secondary:t.swLine,glow:t.g2,particles:t.pc},duration:5000,filename:'congrats_'+sn+'_video.webm'}).then(function(){btn.textContent='\ud83c\udfac Video Download Karo';btn.disabled=false;}).catch(function(){btn.textContent='\ud83c\udfac Video Download Karo';btn.disabled=false;});
+  } else {alert('Video recording module not loaded. Please use Chrome or Firefox.');btn.textContent='\ud83c\udfac Video Download Karo';btn.disabled=false;}
 }
 
 upP();
