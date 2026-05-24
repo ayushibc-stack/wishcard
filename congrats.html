@@ -270,8 +270,8 @@ input[type=range]:disabled{opacity:.2;cursor:not-allowed;}
 
   <!-- Download -->
   <div class="sec">
-    <div class="sh"><div class="sicon">✨</div><div><div class="st">Card Banao</div></div></div>
-    <button class="btn-dl" onclick="dlCard()">🏆 Congratulations Card Download Karo</button>
+    <div class="sh"><div class="sicon">⬇️</div><div><div class="st">Card Download Karo</div></div></div>
+    <button class="btn-dl" onclick="dlCard()">✨ Card Banao & Download Karo</button>
     <p class="fn">📸 HD Photo + 🎬 5 Second Video milegi</p>
   </div>
 
@@ -573,6 +573,7 @@ function dlCard(){
       <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 26%,rgba(0,0,0,0.65) 100%);"></div>
       <div style="position:absolute;inset:0;background:${t.ov};"></div>
       <div style="position:absolute;inset:0;background:linear-gradient(to top,${t.fade} 0%,rgba(0,0,0,0.5) 30%,rgba(0,0,0,0.1) 52%,transparent 70%);"></div>
+      <div class="l-parts" id="cardParticles" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
       <div style="position:absolute;bottom:0;left:0;right:0;padding:0 18px 22px;text-align:center;z-index:10;">
         <div style="background:${t.glass};backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:16px;padding:14px 16px;border:1px solid ${t.glow}22;">
           <span style="font-size:8px;letter-spacing:5px;text-transform:uppercase;color:${t.glow}88;display:block;margin-bottom:4px;">&#10022; CONGRATULATIONS &#10022;</span>
@@ -591,6 +592,19 @@ function dlCard(){
     </div>
     <p style="font-size:9px;color:rgba(255,255,255,0.14);letter-spacing:2px;text-transform:uppercase;margin-top:14px;">&#10022; WishCard.in</p>
   `;
+
+  // Add floating particles to on-page card
+  var partsEl = document.getElementById('cardParticles');
+  if(partsEl){
+    t.pc.forEach(function(c){
+      for(var j=0;j<3;j++){
+        var el=document.createElement('div');el.className='pt';
+        var w=Math.random()*5+3;
+        el.style.cssText='left:'+Math.random()*100+'%;width:'+w+'px;height:'+w+'px;border-radius:'+(Math.random()>.5?'0 50% 0 50%':'50%')+';background:'+c+';--fd:'+(Math.random()*8+6).toFixed(1)+'s;--fd2:'+(Math.random()*10).toFixed(1)+'s;';
+        partsEl.appendChild(el);
+      }
+    });
+  }
   upS(4);
 }
 
@@ -649,7 +663,7 @@ function doVideoDownload(){
   var ms=document.getElementById('mi').value.trim()||o.msg;
   var sn=(nm||'congrats').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
   if(window._recordCardVideo){
-    window._recordCardVideo({photoDataUrl:cropData||null,recipientName:nm,wishText:o.tag,message:ms,colors:{primary:t.sw,secondary:t.swLine,glow:t.g2,particles:t.pc},duration:5000,filename:'congrats_'+sn+'_video.webm'}).then(function(){btn.textContent='\ud83c\udfac Video Download Karo';btn.disabled=false;}).catch(function(){btn.textContent='\ud83c\udfac Video Download Karo';btn.disabled=false;});
+    window._recordCardVideo({photoDataUrl:cropData||null,recipientName:nm,wishText:o.tag,message:ms,colors:{primary:t.sw,secondary:t.swLine,glow:t.g2,particles:t.pc},duration:5000,filename:'congrats_'+sn+'_video.webm',layout:'fullphoto'}).then(function(){btn.textContent='\ud83c\udfac Video Download Karo';btn.disabled=false;}).catch(function(){btn.textContent='\ud83c\udfac Video Download Karo';btn.disabled=false;});
   } else {alert('Video recording module not loaded. Please use Chrome or Firefox.');btn.textContent='\ud83c\udfac Video Download Karo';btn.disabled=false;}
 }
 
