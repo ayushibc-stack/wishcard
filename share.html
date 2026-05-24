@@ -74,6 +74,51 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function sanitizeCSS(val) {
+  if (val === null || val === undefined) return '';
+  val = String(val);
+  // Remove any characters that could break out of CSS into HTML
+  val = val.replace(/[<>]/g, '');
+  // Remove any style/script closing tag patterns
+  val = val.replace(/<\//gi, '');
+  // Remove expression() which is IE-specific XSS vector
+  val = val.replace(/expression\s*\(/gi, '');
+  // Remove @import
+  val = val.replace(/@import/gi, '');
+  return val;
+}
+
+function sanitizeTheme(t) {
+  if (!t || typeof t !== 'object') return {};
+  const clean = {};
+  for (const k of Object.keys(t)) {
+    if (Array.isArray(t[k])) {
+      clean[k] = t[k].map(v => sanitizeCSS(v));
+    } else {
+      clean[k] = sanitizeCSS(t[k]);
+    }
+  }
+  return clean;
+}
+
+function sanitizeBorder(b) {
+  if (!b || typeof b !== 'object') return {};
+  const clean = {};
+  for (const k of Object.keys(b)) {
+    clean[k] = sanitizeCSS(b[k]);
+  }
+  return clean;
+}
+
+function sanitizeFont(f) {
+  if (!f || typeof f !== 'object') return {};
+  const clean = {};
+  for (const k of Object.keys(f)) {
+    clean[k] = sanitizeCSS(f[k]);
+  }
+  return clean;
+}
+
 function ordinal(n) {
   const s = ['th','st','nd','rd'];
   const v = n % 100;
@@ -90,7 +135,7 @@ const OCCASIONS = {
 };
 
 function buildBirthdayCard(data) {
-  const t = data.theme || {};
+  const t = sanitizeTheme(data.theme || {});
   const nm = esc(data.recipientName || 'Aapka Naam');
   const wh = esc(data.wishText || 'Happy Birthday \u{1F33A}');
   const ms = esc(data.message || '').replace(/\n/g,'<br>');
@@ -103,7 +148,7 @@ function buildBirthdayCard(data) {
 
 
 function buildBirthdayFullphotoCard(data) {
-  const t = data.theme || {};
+  const t = sanitizeTheme(data.theme || {});
   const nm = esc(data.recipientName || 'Aapka Naam');
   const wh = esc(data.wishText || 'Happy Birthday \u{1F33A}');
   const ms = esc(data.message || '');
@@ -117,9 +162,9 @@ function buildBirthdayFullphotoCard(data) {
 
 
 function buildCongratsCard(data) {
-  const t = data.theme || {};
-  const b = data.border || {};
-  const fn = data.font || {};
+  const t = sanitizeTheme(data.theme || {});
+  const b = sanitizeBorder(data.border || {});
+  const fn = sanitizeFont(data.font || {});
   const nm = esc(data.recipientName || 'Aapka Naam');
   const ms = esc(data.message || '');
   const ac = data.achievement ? esc(data.achievement) : '';
@@ -134,9 +179,9 @@ function buildCongratsCard(data) {
 
 
 function buildAnniversaryCard(data) {
-  const t = data.theme || {};
-  const b = data.border || {};
-  const fn = data.font || {};
+  const t = sanitizeTheme(data.theme || {});
+  const b = sanitizeBorder(data.border || {});
+  const fn = sanitizeFont(data.font || {});
   const n1 = esc(data.recipientName || '');
   const n2 = esc(data.name2 || '');
   const tagLine = esc(data.tagLine || 'Happy Anniversary');
