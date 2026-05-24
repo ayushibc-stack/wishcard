@@ -624,17 +624,26 @@ function doHDSave(){
 function doShareLink(){
   var btn=document.getElementById('shareBtn');
   btn.textContent='\u23F3 Link ban rahi hai...';btn.disabled=true;
+  var o=OCCASIONS.find(function(x){return x.k===cOcc;})||OCCASIONS[0];
+  var t=THEMES[cTheme];
+  var b=BORDERS[cBorder];
+  var fn=FONTS[cFont];
   window._shareCard({
-    htmlContent:window._generatedHTML,
-    thumbnailDataUrl:window._cardMeta.thumbnailDataUrl,
-    cardType:window._cardMeta.cardType,
-    recipientName:window._cardMeta.recipientName
+    cardType:'congrats',
+    recipientName:document.getElementById('ni').value.trim()||'',
+    message:document.getElementById('mi').value.trim()||o.msg,
+    occasion:cOcc,
+    achievement:document.getElementById('ai').value.trim()||'',
+    photoDataUrl:cropData||'',
+    theme:{ov:t.ov,fade:t.fade,glow:t.glow,g2:t.g2,glass:t.glass,glowStr:t.glowStr,divBg:t.divBg,pc:t.pc,sw:t.sw,swLine:t.swLine,swDot:t.swDot},
+    border:{css:b.css,outerCss:b.outerCss},
+    font:{f:fn.f,nameSize:fn.nameSize,weight:fn.weight}
   }).then(function(result){
-    if(result.success){window._showShareUI(result.cardId,window._cardMeta.recipientName,window._cardMeta.cardType);}
-    else{alert('Share failed: '+(result.error||'Unknown error'));}
+    if(result.success){window._showShareUI(result.cardId,document.getElementById('ni').value.trim()||'','congrats');}
+    else{window._showErrorToast('Share failed: '+(result.error||'Unknown error'));}
     btn.textContent='\u{1F517} Share Link';btn.disabled=false;
   }).catch(function(e){
-    alert('Error: '+e.message);
+    window._showErrorToast('Error: '+e.message);
     btn.textContent='\u{1F517} Share Link';btn.disabled=false;
   });
 }

@@ -854,17 +854,30 @@ function doHDSave(){
 function doShareLink(){
   var btn=document.getElementById('shareBtn');
   btn.textContent='\u23F3 Link ban rahi hai...';btn.disabled=true;
+  var t=THEMES[cTheme];
+  var b=BORDERS[cBorder];
+  var fn=FONTS[cFont];
+  var tag=TAGS.find(function(x){return x.k===cTag;});
+  var tagLine=customTagActive?document.getElementById('customTag').value:(tag?tag.line:'Happy Anniversary');
+  var n1=document.getElementById('n1').value.trim();
+  var n2=document.getElementById('n2').value.trim();
   window._shareCard({
-    htmlContent:window._generatedHTML,
-    thumbnailDataUrl:window._cardMeta.thumbnailDataUrl,
-    cardType:window._cardMeta.cardType,
-    recipientName:window._cardMeta.recipientName
+    cardType:'anniversary',
+    recipientName:n1||'',
+    name2:n2||'',
+    tagLine:tagLine,
+    years:document.getElementById('yrs').value.trim()||'',
+    message:cMsg||'',
+    photoDataUrl:cropData||'',
+    theme:{ov:t.ov,fade:t.fade,glow:t.glow,g2:t.g2,glass:t.glass,glowStr:t.glowStr,divBg:t.divBg,hearts:t.hearts,petals:t.petals,sw:t.sw},
+    border:{css:b.css,outer:b.outer},
+    font:{f:fn.f,sz:fn.sz,w:fn.w}
   }).then(function(result){
-    if(result.success){window._showShareUI(result.cardId,window._cardMeta.recipientName,window._cardMeta.cardType);}
-    else{alert('Share failed: '+(result.error||'Unknown error'));}
+    if(result.success){window._showShareUI(result.cardId,(n1&&n2?n1+' & '+n2:n1||n2||''),'anniversary');}
+    else{window._showErrorToast('Share failed: '+(result.error||'Unknown error'));}
     btn.textContent='\u{1F517} Share Link';btn.disabled=false;
   }).catch(function(e){
-    alert('Error: '+e.message);
+    window._showErrorToast('Error: '+e.message);
     btn.textContent='\u{1F517} Share Link';btn.disabled=false;
   });
 }
