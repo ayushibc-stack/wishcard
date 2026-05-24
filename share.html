@@ -173,7 +173,7 @@ html, body {
 
 <!-- Card Section -->
 <div class="card-section" id="cardSection">
-  <iframe id="cardIframe" title="Your greeting card"></iframe>
+  <iframe id="cardIframe" sandbox="allow-scripts" title="Your greeting card"></iframe>
 </div>
 
 <!-- Error Section -->
@@ -223,11 +223,8 @@ async function showCardImmediate(htmlUrl) {
     cardSection.classList.add('active');
     cardIframe.srcdoc = htmlContent;
   } catch (err) {
-    // Fallback: try setting src directly (might work in some browsers)
-    console.warn('srcdoc fetch failed, falling back to src:', err);
-    loadingScreen.classList.add('hidden');
-    cardSection.classList.add('active');
-    cardIframe.src = htmlUrl;
+    console.error('Failed to load card content:', err);
+    showError('Card load nahi ho raha', 'Internet connection check karo aur retry karo.', 'Retry', 'retry');
   }
 }
 
@@ -237,13 +234,17 @@ async function loadCard() {
     return;
   }
 
+  let timedOut = false;
   const timeout = setTimeout(() => {
+    timedOut = true;
     showError('Loading mein time lag raha hai', 'Internet slow hai ya card load nahi ho raha. Please retry karo.', 'Retry', 'retry');
   }, 15000);
 
   try {
     const cardRef = doc(db, 'cards', cardId);
     const cardSnap = await getDoc(cardRef);
+
+    if (timedOut) return;
 
     if (!cardSnap.exists()) {
       clearTimeout(timeout);
@@ -257,9 +258,10 @@ async function loadCard() {
     try {
       await updateDoc(cardRef, { openCount: increment(1) });
     } catch (e) {
-      // Analytics increment failure should not block card viewing
       console.warn('Could not update openCount:', e);
     }
+
+    if (timedOut) return;
 
     const { htmlUrl } = cardData;
 
@@ -275,6 +277,7 @@ async function loadCard() {
 
   } catch (error) {
     clearTimeout(timeout);
+    if (timedOut) return;
     console.error('Error loading card:', error);
     showError('Kuch gadbad hai', 'Please retry karo. Check your internet connection.', 'Retry', 'retry');
   }
