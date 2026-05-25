@@ -1,7 +1,7 @@
 {
   "hosting": {
     "public": ".",
-    "ignore": [".git", "node_modules", ".github", ".agents", "firebase-debug.log", ".firebaserc"],
+    "ignore": [".git", "node_modules", ".github", ".agents", "firebase-debug.log", ".firebaserc", "cors.json"],
     "rewrites": [
       {
         "source": "/card/**",
