@@ -1,0 +1,33 @@
+{
+  "id": "FEAT-001",
+  "type": "refactor",
+  "description": "Refactor share.html to extract a single unified HD save utility function and add HD save to the congrats card. Currently: birthday card uses html2canvas, fullphoto and anniversary cards each have their own duplicated canvas rendering code, and congrats card has NO HD save at all. Goal: Create one shared hdSave() utility that all 4 card builders include, removing all duplication.",
+  "status": "in_progress",
+  "steps": [
+    "Step 1: Design a unified `wishcardHDSave(config)` function that handles both approaches: (A) html2canvas-based rendering for cards with small/circular photos (birthday card), and (B) manual canvas rendering for full-bleed photo cards (fullphoto, congrats, anniversary). The config object should accept: { mode: 'html2canvas' | 'canvas', cardSelector: string, btnSelector: string, filename: string, width: number, height: number, photoSelector: string, fallbackBg: string, overlays: function(ctx, W, H) }.",
+    "Step 2: Create a helper function `getHDSaveScript(config)` inside share.html (in the module script section, alongside the card builders) that returns a string containing the <script> block with the unified hdSave function pre-configured for a specific card type. This keeps the definition in ONE place but allows each card builder to include it.",
+    "Step 3: Refactor `buildBirthdayCard()` to: (a) Keep html2canvas CDN script tag, (b) Replace the inline sHD() function with a call to the shared utility configured for html2canvas mode with cardSelector='#card', btnSelector='#sb', filename='birthday_card_HD.png'.",
+    "Step 4: Refactor `buildBirthdayFullphotoCard()` to: (a) Remove its duplicated canvas code, (b) Use the shared utility configured for canvas mode with the specific overlay rendering (name, wish text, message with word-wrap, theme colors).",
+    "Step 5: Add HD save button to `buildCongratsCard()` - currently missing entirely. Add a button element in the HTML (positioned as a fixed bottom bar or below the glass text area). Use the shared utility configured for canvas mode with congrats-specific overlay rendering (occasion tag, name, achievement, message).",
+    "Step 6: Refactor `buildAnniversaryCard()` to: (a) Remove its duplicated canvas code, (b) Use the shared utility configured for canvas mode with anniversary-specific overlay rendering (tagline, years, names, message).",
+    "Step 7: Validate the final share.html - ensure all 4 card types have a working HD save button, the generated HTML is syntactically valid, and the shared function is defined in exactly one place (the getHDSaveScript helper)."
+  ],
+  "acceptance_criteria": [
+    "All 4 card builder functions (buildBirthdayCard, buildBirthdayFullphotoCard, buildCongratsCard, buildAnniversaryCard) include an HD save button in their generated HTML",
+    "The HD save logic is defined in ONE place (a helper function that generates the script block), not duplicated across card builders",
+    "The congrats card (previously missing HD save) now has a working HD save button",
+    "Birthday card still uses html2canvas approach (CDN loaded) for its circular-photo card layout",
+    "Fullphoto, congrats, and anniversary cards use the manual canvas approach with crossOrigin=anonymous image loading",
+    "Each card's HD save produces a 1080x1920 PNG download (for canvas mode) or a 3x scale PNG (for html2canvas mode)",
+    "The file validates with no JavaScript syntax errors in the generated HTML strings",
+    "The share.html file is smaller or similar in size (not significantly larger due to duplication removal)"
+  ],
+  "verification": [
+    "Run `node -e \"const fs=require('fs'); const html=fs.readFileSync('share.html','utf8'); eval(html.match(/<script type=\\\"module\\\">[\\\\s\\\\S]*?<\\/script>/)[0].replace(/<\\/?script[^>]*>/g,'').replace(/import[^;]+;/g,'').replace(/await /g,'').replace(/async /g,''));\"` to check for syntax errors (approximate check)",
+    "Run `grep -c 'HD.*Save\\|hdSave\\|sHD' share.html` to confirm HD save references exist for all cards",
+    "Run `grep -c 'buildCongratsCard\\|buildBirthdayCard\\|buildBirthdayFullphotoCard\\|buildAnniversaryCard' share.html` to confirm all 4 builders still exist",
+    "Verify the file has no duplicate large canvas rendering blocks by checking line count is reduced from 261"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
