@@ -725,8 +725,10 @@ function doShareLink(){
     recipientName:babyName,
     message:msg,
     occasion:cOcc,
+    parents:parents,
+    birthDetail:birth,
     photoDataUrl:cropData||'',
-    theme:{ov:t.ov,fade:t.fade,glow:t.glow,g2:t.g2,glass:t.glass,glowStr:t.glowStr,divBg:t.divBg,pc:t.pc,sw:t.sw,swLine:t.swLine,swDot:t.swDot},
+    theme:{ov:t.ov,fade:t.fade,glow:t.glow,g2:t.g2,glass:t.glass,glowStr:t.glowStr,divBg:t.divBg,pc:t.pc,sw:t.sw,swLine:t.swLine,swDot:t.swDot,floats:t.floats},
     font:{f:fn.f,sz:fn.sz,w:fn.w}
   }).then(function(result){
     if(result.success){window._showShareUI(result.cardId,babyName||'','baby');}

@@ -11,7 +11,7 @@ import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/fireba
  * 2. Create Firestore document with all card metadata
  * 3. Return shareable link
  */
-export async function shareCard({ cardType, recipientName, wishText, message, occasion, theme, border, font, photoDataUrl, years, name2, tagLine, showGlassPlate, achievement }) {
+export async function shareCard({ cardType, recipientName, wishText, message, occasion, theme, border, font, photoDataUrl, years, name2, tagLine, showGlassPlate, achievement, parents, birthDetail }) {
   const progressUI = showProgressUI();
 
   try {
@@ -49,6 +49,8 @@ export async function shareCard({ cardType, recipientName, wishText, message, oc
     if (tagLine) cardDoc.tagLine = tagLine;
     if (showGlassPlate !== undefined) cardDoc.showGlassPlate = showGlassPlate;
     if (achievement) cardDoc.achievement = achievement;
+    if (parents) cardDoc.parents = parents;
+    if (birthDetail) cardDoc.birthDetail = birthDetail;
 
     await setDoc(doc(db, 'cards', cardId), cardDoc);
 
