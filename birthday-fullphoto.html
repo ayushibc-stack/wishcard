@@ -485,10 +485,6 @@ body{display:flex;flex-direction:column;align-items:center;justify-content:cente
 .divider{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0;}
 .divider span{width:30px;height:1px;background:rgba(255,255,255,0.15);}
 .msg{font-size:12px;color:rgba(255,255,255,0.55);line-height:1.5;display:block;}
-
-.btns{display:flex;width:min(340px,88vw);margin-top:5px;}
-.btn-hd{flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;color:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
-.btn-hd:hover{background:rgba(255,255,255,0.15);transform:translateY(-2px);}
 </style>
 </head>
 <body>
@@ -515,9 +511,6 @@ body{display:flex;flex-direction:column;align-items:center;justify-content:cente
     </div>
   </div>
   
-  <div class="btns">
-    <button class="btn-hd" id="sb" onclick="sHD()">\u{1F4F8} Full HD Card Save Karo</button>
-  </div>
 </div>
 
 <script>
@@ -636,7 +629,7 @@ function sHD(){
 
   co.innerHTML=`
     <iframe id="previewFrame" style="flex:1;width:100%;border:none;" sandbox="allow-scripts"></iframe>
-    <div style="position:fixed;bottom:0;left:0;right:0;display:flex;gap:10px;padding:12px 16px;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,0.1);z-index:101;">
+    <div style="position:fixed;bottom:12px;left:12px;right:12px;display:flex;gap:8px;padding:12px 14px;background:rgba(0,0,0,0.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;z-index:101;">
       <button onclick="doHDSave()" id="hdBtn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px;color:white;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;">\u{1F4F8} HD Save</button>
       <button onclick="doShareLink()" id="shareBtn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#25D366,#128C7E);border:none;border-radius:12px;padding:12px;color:white;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;">\u{1F517} Share</button>
       <button onclick="backToEdit()" style="display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 16px;color:rgba(255,255,255,0.6);font-family:inherit;font-size:13px;cursor:pointer;transition:all .2s;">\u270F\uFE0F</button>
