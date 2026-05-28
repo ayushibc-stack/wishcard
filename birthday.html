@@ -418,29 +418,42 @@ function doHDSave(){
   var ctx=cv.getContext('2d');
 
   var renderCard=function(){
-    var bgGrad=ctx.createLinearGradient(0,0,W,H);
-    bgGrad.addColorStop(0,t.bg);bgGrad.addColorStop(0.5,t.mid);bgGrad.addColorStop(1,t.bg2);
-    ctx.fillStyle=bgGrad;ctx.fillRect(0,0,W,H);
-    var photoSize=W*0.38;
-    var px=(W-photoSize)/2,py=H*0.12;
+    ctx.fillStyle='#0a0612';ctx.fillRect(0,0,W,H);
+    var pX=80,pY=100,pW=W-160,pH=H-200,pR=44;
+    var cardGrad=ctx.createLinearGradient(pX,pY,pX+pW,pY+pH);
+    cardGrad.addColorStop(0,t.mid);cardGrad.addColorStop(1,t.bg2);
+    ctx.save();ctx.shadowColor=t.a;ctx.shadowBlur=50;
+    ctx.beginPath();ctx.moveTo(pX+pR,pY);ctx.lineTo(pX+pW-pR,pY);ctx.quadraticCurveTo(pX+pW,pY,pX+pW,pY+pR);
+    ctx.lineTo(pX+pW,pY+pH-pR);ctx.quadraticCurveTo(pX+pW,pY+pH,pX+pW-pR,pY+pH);
+    ctx.lineTo(pX+pR,pY+pH);ctx.quadraticCurveTo(pX,pY+pH,pX,pY+pH-pR);
+    ctx.lineTo(pX,pY+pR);ctx.quadraticCurveTo(pX,pY,pX+pR,pY);
+    ctx.closePath();ctx.fillStyle=cardGrad;ctx.fill();
+    ctx.shadowBlur=0;ctx.strokeStyle=t.a+'55';ctx.lineWidth=3;ctx.stroke();ctx.restore();
+    var photoSize=W*0.34;
+    var px=(W-photoSize)/2,py=pY+80;
     ctx.beginPath();ctx.arc(px+photoSize/2,py+photoSize/2,photoSize/2+8,0,Math.PI*2);
-    ctx.strokeStyle=t.a;ctx.lineWidth=6;ctx.shadowColor=t.a;ctx.shadowBlur=30;ctx.stroke();ctx.shadowBlur=0;
+    ctx.strokeStyle=t.a;ctx.lineWidth=5;ctx.shadowColor=t.a;ctx.shadowBlur=25;ctx.stroke();ctx.shadowBlur=0;
     if(crop){var img=document.createElement('img');img.src=crop;ctx.save();ctx.beginPath();ctx.arc(px+photoSize/2,py+photoSize/2,photoSize/2,0,Math.PI*2);ctx.clip();ctx.drawImage(img,px,py,photoSize,photoSize);ctx.restore();}
     ctx.textAlign='center';
+    var textX=W/2;var textStartY=py+photoSize+70;
     ctx.font="500 28px 'Poppins',sans-serif";ctx.fillStyle=t.a;
-    ctx.fillText('\u2726 Special Day \u2726',W/2,py+photoSize+80);
-    ctx.save();ctx.font="700 100px 'Cormorant Garamond',serif";ctx.fillStyle='#ffffff';
+    ctx.fillText('\u2726 Special Day \u2726',textX,textStartY);
+    ctx.save();ctx.font="700 90px 'Cormorant Garamond',serif";ctx.fillStyle='#ffffff';
     ctx.shadowColor=t.a;ctx.shadowBlur=30;
-    ctx.fillText(nm,W/2,py+photoSize+200);ctx.restore();
-    ctx.font="italic 50px 'Cormorant Garamond',serif";ctx.fillStyle=t.a2;
-    ctx.fillText(wh,W/2,py+photoSize+280);
-    ctx.font="100px serif";ctx.fillText('\u{1F382}',W/2,py+photoSize+420);
-    ctx.font="400 36px 'Poppins',sans-serif";ctx.fillStyle='rgba(255,255,255,0.55)';
-    var words=rm.split(' '),line='',lineY=py+photoSize+520;
-    for(var n=0;n<words.length;n++){var testLine=line+words[n]+' ';if(ctx.measureText(testLine).width>W*0.75&&n>0){ctx.fillText(line,W/2,lineY);line=words[n]+' ';lineY+=50;}else{line=testLine;}}
-    ctx.fillText(line,W/2,lineY);
+    ctx.fillText(nm,textX,textStartY+110);ctx.restore();
+    ctx.font="italic 46px 'Cormorant Garamond',serif";ctx.fillStyle=t.a2;
+    ctx.fillText(wh,textX,textStartY+185);
+    ctx.strokeStyle=t.a+'44';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(W*0.25,textStartY+225);ctx.lineTo(W*0.45,textStartY+225);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(W*0.55,textStartY+225);ctx.lineTo(W*0.75,textStartY+225);ctx.stroke();
+    ctx.font="28px serif";ctx.fillStyle='white';ctx.fillText('\u{1F380}',textX,textStartY+233);
+    ctx.font="90px serif";ctx.fillText('\u{1F382}',textX,textStartY+370);
+    ctx.font="400 34px 'Poppins',sans-serif";ctx.fillStyle='rgba(255,255,255,0.55)';
+    var words=rm.split(' '),line='',lineY=textStartY+450;
+    for(var n=0;n<words.length;n++){var testLine=line+words[n]+' ';if(ctx.measureText(testLine).width>pW*0.8&&n>0){ctx.fillText(line,textX,lineY);line=words[n]+' ';lineY+=48;}else{line=testLine;}}
+    ctx.fillText(line,textX,lineY);
     ctx.font="300 28px 'Poppins',sans-serif";ctx.fillStyle='rgba(255,255,255,0.3)';
-    ctx.fillText('WishCard.in',W/2,H-60);
+    ctx.fillText('WishCard.in',textX,H-70);
     var a=document.createElement('a');a.download='birthday_'+sn+'_HD.png';a.href=cv.toDataURL('image/png',1);a.click();
     btn.textContent='\u2705 Saved!';btn.disabled=false;
     setTimeout(function(){btn.textContent='\u{1F4F8} HD Photo Save Karo';},3000);
