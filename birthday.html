@@ -431,8 +431,8 @@ function doHDSave(){
     ctx.shadowBlur=0;ctx.strokeStyle=t.a+'55';ctx.lineWidth=3;ctx.stroke();ctx.restore();
     var photoSize=W*0.34;
     var px=(W-photoSize)/2,py=pY+80;
-    ctx.beginPath();ctx.arc(px+photoSize/2,py+photoSize/2,photoSize/2+8,0,Math.PI*2);
-    ctx.strokeStyle=t.a;ctx.lineWidth=5;ctx.shadowColor=t.a;ctx.shadowBlur=25;ctx.stroke();ctx.shadowBlur=0;
+    ctx.save();ctx.beginPath();ctx.arc(px+photoSize/2,py+photoSize/2,photoSize/2+8,0,Math.PI*2);
+    ctx.strokeStyle=t.a;ctx.lineWidth=5;ctx.shadowColor=t.a;ctx.shadowBlur=25;ctx.stroke();ctx.restore();
     if(crop){var img=document.createElement('img');img.src=crop;ctx.save();ctx.beginPath();ctx.arc(px+photoSize/2,py+photoSize/2,photoSize/2,0,Math.PI*2);ctx.clip();ctx.drawImage(img,px,py,photoSize,photoSize);ctx.restore();}
     ctx.textAlign='center';
     var textX=W/2;var textStartY=py+photoSize+70;
