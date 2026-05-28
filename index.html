@@ -75,6 +75,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:62px;display:flex;ali
 .gpill:nth-child(3){animation:pfloat 4s ease-in-out infinite alternate .2s;}
 .gpill:nth-child(4){animation:pfloat 3.6s ease-in-out infinite alternate .6s;}
 .gpill:nth-child(5){animation:pfloat 3.9s ease-in-out infinite alternate .8s;}
+.gpill:nth-child(6){animation:pfloat 3.7s ease-in-out infinite alternate .5s;}
 @keyframes pfloat{from{transform:translateY(0);}to{transform:translateY(-7px);}}
 .pill-tag{position:absolute;top:-9px;right:12px;font-size:9px;font-weight:700;padding:2px 9px;border-radius:100px;color:#fff;z-index:3;box-shadow:0 3px 10px rgba(0,0,0,0.3);}
 .pill-body{padding:12px 22px;border-radius:100px;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:8px;color:#fff;backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.08);transition:all .3s ease;white-space:nowrap;}
@@ -90,6 +91,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:62px;display:flex;ali
 .gpill.cine .pill-tag{background:linear-gradient(135deg,#3b82f6,#a855f7);}
 .gpill.cine .pill-body{background:rgba(59,130,246,0.04);}
 .gpill.cine:hover .pill-body{box-shadow:0 0 28px rgba(59,130,246,0.4);border-color:rgba(59,130,246,0.5);}
+.gpill.baby .pill-tag{background:linear-gradient(135deg,#7eb8f7,#c084fc);}
+.gpill.baby .pill-body{background:rgba(126,184,247,0.04);}
+.gpill.baby:hover .pill-body{box-shadow:0 0 28px rgba(126,184,247,0.4);border-color:rgba(126,184,247,0.5);}
 .gpill.cong .pill-tag{background:linear-gradient(135deg,#14b8a6,#059669);}
 .gpill.cong .pill-body{background:rgba(20,184,166,0.04);}
 .gpill.cong:hover .pill-body{box-shadow:0 0 28px rgba(20,184,166,0.4);border-color:rgba(20,184,166,0.5);}
@@ -156,6 +160,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:62px;display:flex;ali
 .wedding .avail-tag{color:rgba(244,114,182,0.6);}
 .wedding:hover{transform:translateY(-6px);border-color:rgba(244,114,182,0.35);box-shadow:0 20px 40px rgba(244,114,182,0.12);background:linear-gradient(180deg,#1b0f16,#110c1f);}
 .wedding:hover .tool-arrow{background:#f472b6;transform:rotate(-45deg);}
+
+/* Baby */
+.tool-card.baby{border-color:rgba(126,184,247,0.15);}
+.baby .tool-icon{background:linear-gradient(135deg,#7eb8f7,#c084fc);}
+.baby .status-pill{background:rgba(126,184,247,0.15);color:#93c5fd;}
+.baby .tool-name-hindi{color:#7eb8f7;}
+.baby .tool-desc{color:#d6e8f7;}
+.baby .avail-tag{color:#7eb8f7;}
+.baby:hover{transform:translateY(-6px);border-color:rgba(126,184,247,0.4);box-shadow:0 20px 40px rgba(126,184,247,0.15);background:linear-gradient(180deg,#0c1222,#110c1f);}
+.baby:hover .tool-arrow{background:#7eb8f7;color:var(--ink);transform:rotate(-45deg);}
 
 /* Exam */
 .tool-card.exam{border-color:rgba(20,184,166,0.12);}
@@ -240,10 +254,9 @@ footer{background:#040208;padding:56px 24px 36px;text-align:center;border-top:1p
     gap:10px;
     max-width:360px;
   }
-  .hero-preview .gpill:last-child{
-    grid-column:1/-1;
-    justify-self:center;
-    max-width:200px;
+  .hero-preview .gpill:nth-child(5),
+  .hero-preview .gpill:nth-child(6){
+    grid-column:auto;
   }
   .pill-body{padding:11px 16px;font-size:12.5px;}
   .why-grid{grid-template-columns:1fr 1fr;}
@@ -291,6 +304,10 @@ footer{background:#040208;padding:56px 24px 36px;text-align:center;border-top:1p
       <a href="#tools" class="gpill anni">
         <span class="pill-tag">💎 Premium</span>
         <span class="pill-body">❤️ Anniversary</span>
+      </a>
+      <a href="baby.html" class="gpill baby">
+        <span class="pill-tag">👶 New</span>
+        <span class="pill-body">👶 Baby Card</span>
       </a>
       <a href="congrats.html" class="gpill cong">
         <span class="pill-tag">🏆 Live</span>
@@ -350,6 +367,21 @@ footer{background:#040208;padding:56px 24px 36px;text-align:center;border-top:1p
       </div>
     </div>
 
+
+    <!-- Baby Card Maker - LIVE -->
+    <a href="baby.html" class="tool-card baby">
+      <div class="tool-header-row">
+        <div class="tool-icon">👶</div>
+        <span class="status-pill">✓ Live & Ready</span>
+      </div>
+      <div class="tool-name">Baby Born Card Maker</div>
+      <div class="tool-name-hindi">बेबी बॉर्न कार्ड बनाओ</div>
+      <div class="tool-desc">Baby boy, girl, twins ya baby shower — cute animated card banao photo ke saath. 5 themes, fonts, HD Save aur WhatsApp share.</div>
+      <div class="tool-footer">
+        <span class="avail-tag">👶 Free — Abhi Banao</span>
+        <div class="tool-arrow">↑</div>
+      </div>
+    </a>
 
     <!-- Congrats Card Maker - LIVE -->
     <a href="congrats.html" class="tool-card exam">
